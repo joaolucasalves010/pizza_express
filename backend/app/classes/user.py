@@ -6,6 +6,7 @@ class UserBase(SQLModel):
     age: int | None = Field(default=None)
 
 class User(UserBase, table=True):
+    id: int | None = Field(default=None, primary_key=True) # Id temporário
     password: str
 
 """
