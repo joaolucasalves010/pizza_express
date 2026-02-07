@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.responses import JSONResponse, Response
 from typing import Annotated
 from classes.user import * # Importando todas as classes SQLMODEL
 
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import SQLModel, Session, create_engine, select
 
 router = APIRouter()
 
@@ -22,15 +22,23 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-fake_users_db = []
-
 @router.post("/users/", tags=["users"])
-def create_user(user: Annotated[User, Body()], sesion: SessionDep) -> Response:
-    
-    db_user = user.model_dump()
-    fake_users_db.append(db_user)
+def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
+    session.add(user)
+    session.commit()
+    session.refresh(user)
     return JSONResponse(status_code=200, content={"message": "Usuário criado com sucesso!"})
 
-@router.get("/users/", status_code=200, tags=["users"])
-def read_users() -> list:
-    return fake_users_db
+@router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
+def read_users(session: SessionDep):
+    users_list = session.exec(select(User)).all()
+    if len(users_list) == 0:
+        raise HTTPException(status_code=404, detail="Nenhum usuário encontrado!")
+    return users_list
+
+@router.get("/users/{user_id}", response_model=UserPublic, tags=["users"])
+def get_user(user_id: int, session: SessionDep):
+    user = session.exec(select(User).where(User.id == user_id)).one_or_none()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return user
