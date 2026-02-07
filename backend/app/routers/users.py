@@ -4,8 +4,22 @@ from typing import Annotated
 from classes.user import * # Importando todas as classes SQLMODEL
 
 from sqlmodel import SQLModel, Session, create_engine, select
+from dotenv import load_dotenv
+import os
 
 router = APIRouter()
+
+load_dotenv()
+
+"""
+
+Para gerar sua SECRET_KEY, abra um terminal Linux e digite o comando "openssl rand -hex 32"
+crie um arquivo .env e adicione uma variável SECRET_KEY com o valor gerado pelo terminal linux
+
+"""
+
+SECRET_KEY = os.environ["SECRET_KEY"]
+ALGORITHM = "HS256" # Algoritmo de assinatura
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
