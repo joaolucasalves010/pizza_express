@@ -9,6 +9,9 @@ class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True) # Id temporário
     password: str
 
+class UserPublic(UserBase):
+    id: int | None = Field(default=None, primary_key=True)
+     
 """
 
 Comentando temporariamente até termos o esquema de hash
@@ -16,6 +19,5 @@ Comentando temporariamente até termos o esquema de hash
 class UserInDb(UserBase, table=True):
     id: int | None = Field(primary_key=True, default=None)
     hashed_password: str
-
 
 """
