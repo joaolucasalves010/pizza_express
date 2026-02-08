@@ -13,6 +13,7 @@ from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 
 from pathlib import Path
+from sqlalchemy import func
 
 router = APIRouter()
 
@@ -26,6 +27,8 @@ crie um arquivo .env e adicione uma variável SECRET_KEY com o valor gerado pelo
 """
 
 SECRET_KEY = os.environ["SECRET_KEY"]
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY NÃO DEFINIDA!")
 ALGORITHM = "HS256" # Algoritmo de assinatura
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 # Tempo em minutos de expiração do token
 
@@ -56,8 +59,20 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+def verify_existing_username(username: str, session: SessionDep):
+    clean_username = username.lower().strip()
+    user = session.exec(
+        select(UserDb).where(func.lower(UserDb.username) == clean_username)
+    ).one_or_none()
+    
+    if user is not None:
+        raise HTTPException(status_code=409, detail="Esse nome de usuário já está em uso") # Nome de usuário já existe
+
 @router.post("/users/", tags=["users"])
 def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
+
+    verify_existing_username(user.username, session)
+
     hashed_password = get_password_hash(user.password)
     db_user = UserDb(
         username=user.username,
@@ -77,9 +92,12 @@ def read_users(session: SessionDep):
         raise HTTPException(status_code=404, detail="Nenhum usuário encontrado!")
     return users_list
 
-@router.get("/users/{user_id}", response_model=UserPublic, tags=["users"])
-def get_user(user_id: int, session: SessionDep):
-    user = session.exec(select(UserDb).where(UserDb.id == user_id)).one_or_none()
+@router.get("/users/{username}", response_model=UserPublic, tags=["users"])
+def get_user(username: str, session: SessionDep):
+    clean_username = username.strip().lower()
+    user = session.exec(
+        select(UserDb).where(func.lower(UserDb.username) == clean_username)
+    ).one_or_none()
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     return user
