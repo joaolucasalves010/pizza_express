@@ -5,19 +5,12 @@ class UserBase(SQLModel):
     full_name: str = Field(index=True)
     age: int | None = Field(default=None)
 
-class User(UserBase, table=True):
-    id: int | None = Field(default=None, primary_key=True) # Id temporário
+class User(UserBase):
     password: str
 
 class UserPublic(UserBase):
     id: int | None = Field(default=None, primary_key=True)
      
-"""
-
-Comentando temporariamente até termos o esquema de hash
-
-class UserInDb(UserBase, table=True):
+class UserDb(UserBase, table=True):
     id: int | None = Field(primary_key=True, default=None)
     hashed_password: str
-
-"""
