@@ -80,6 +80,34 @@ def get_user_db(username: str, session: SessionDep):
     ).one_or_none()
     return user
 
+def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    session: SessionDep,
+):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Credenciais inválidas",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        username = payload.get("username")
+        full_name = payload.get("full_name")
+        
+        if username is None or full_name is None:
+            raise credentials_exception
+        token_data = TokenData(username=username, full_name=full_name)
+    
+    except InvalidTokenError:
+        raise credentials_exception
+    
+    user = get_user_db(session=session, username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
 def authenticate_user(session: SessionDep, username: str, password: str):
     clean_username = username.lower().strip()
     user = session.exec(
@@ -116,7 +144,7 @@ def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
-    return JSONResponse(status_code=200, content={"message": "Usuário criado com sucesso!"})
+    return JSONResponse(status_code=201, content={"message": "Usuário criado com sucesso!"})
 
 @router.post("/auth/login", tags=["auth"], response_model_exclude_unset=True)
 def login_for_access_token(
@@ -142,83 +170,26 @@ def read_users_me(
     token: Annotated[str, Depends(oauth2_scheme)],
     session: SessionDep
 ):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Credenciais inválidas",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("username")
-        full_name = payload.get("full_name")
-        if username is None or full_name is None:
-            raise credentials_exception
-        token_data = TokenData(username=username, full_name=full_name)
-    except InvalidTokenError:
-        raise credentials_exception
-    user = get_user_db(session=session, username=token_data.username)
-    if user is None:
-        raise credentials_exception
+    user = get_current_user(token=token, session=session)
     return user
 
 @router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
-def read_users(session: SessionDep, token: Annotated[str, Depends(oauth2_scheme)]):
-
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Credenciais inválidas",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("username")
-        full_name = payload.get("full_name")
-        if username is None or full_name is None:
-            raise credentials_exception
-    except InvalidTokenError:
-        raise credentials_exception
-    user = get_user_db(session=session, username=username)
-    if user is None:
-        raise credentials_exception
-
-    users_list = session.exec(select(UserDb)).all()
-    if len(users_list) == 0:
-        raise HTTPException(status_code=404, detail="Nenhum usuário encontrado!")
-    return users_list
+def read_users(
+    session: SessionDep, 
+    token: Annotated[str, Depends(oauth2_scheme)],
+    current_user: Annotated[UserDb, Depends(get_current_user)]
+):
+    users = session.exec(select(UserDb)).all()
+    return users
 
 @router.get("/users/{username}", response_model=UserPublic, tags=["users"])
 def read_user(
     username: str,
     session: SessionDep,
-    token: Annotated[str, Depends(oauth2_scheme)]
+    token: Annotated[str, Depends(oauth2_scheme)],
+    current_user: Annotated[UserDb, Depends(get_current_user)],
 ): 
-    
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Credenciais inválidas",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        token_username = payload.get("username")
-        full_name = payload.get("full_name")
-        if token_username is None or full_name is None:
-            raise credentials_exception
-    except InvalidTokenError:
-        raise credentials_exception
-
-    # verifica se o usuário do token existe no banco
-    auth_user = get_user_db(session=session, username=token_username)
-    if auth_user is None:
-        raise credentials_exception
-
-    # agora busca o usuário da URL
     user = get_user_db(username=username, session=session)
-    
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    return user
+    return user        
