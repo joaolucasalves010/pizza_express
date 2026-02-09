@@ -167,11 +167,10 @@ def login_for_access_token(
 
 @router.get("/auth/me", tags=["auth"], response_model=UserPublic)
 def read_users_me(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    session: SessionDep
+    current_user: Annotated[UserDb, Depends(get_current_user)]
 ):
-    user = get_current_user(token=token, session=session)
-    return user
+    return current_user
+    
 
 @router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
 def read_users(
