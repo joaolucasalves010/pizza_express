@@ -14,3 +14,7 @@ class UserPublic(UserBase):
 class UserDb(UserBase, table=True):
     id: int | None = Field(primary_key=True, default=None)
     hashed_password: str
+
+class UserLogin(SQLModel):
+    username: str = Field(index=True)
+    password: str
