@@ -146,7 +146,7 @@ def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
     session.refresh(db_user)
     return JSONResponse(status_code=201, content={"message": "Usuário criado com sucesso!"})
 
-@router.post("/auth/login", tags=["auth"], response_model_exclude_unset=True)
+@router.post("/auth/login", tags=["auth"])
 def login_for_access_token(
     data: Annotated[UserLogin, Body()],
     session: SessionDep
