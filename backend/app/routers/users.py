@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.responses import JSONResponse, Response
 from typing import Annotated
-from classes.user import * # Importando todas as classes SQLMODEL
 
-from sqlmodel import SQLModel, Session, create_engine, select
 from dotenv import load_dotenv
 import os
 
@@ -12,11 +10,17 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 
-from pathlib import Path
+from sqlmodel import select
+
 from sqlalchemy import func
 
 from datetime import timedelta, datetime, timezone
-from classes.token import *
+
+# Importando todas as classes SQLMODEL
+from models.token import *
+from models.user import *
+from models.orders import *
+from database import SessionDep
 
 router = APIRouter()
 
@@ -40,29 +44,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30 # Tempo em minutos de expiração do token
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-ROOT_PATH = Path(__file__).parent.parent
-
-sqlite_file_name = os.path.join(ROOT_PATH, "database.db")
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-print(ROOT_PATH)
-
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, connect_args=connect_args, echo=True) # mostra as consultas na tela
-
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-SessionDep = Annotated[Session, Depends(get_session)]
-
 def get_password_hash(password):
     return password_hash.hash(password)
 
 def verify_password(simple_password, hashed_password):
     return password_hash.verify(simple_password, hashed_password)
-
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
 
 def verify_existing_username(username: str, session: SessionDep):
     clean_username = username.lower().strip()
@@ -170,7 +156,7 @@ def read_users_me(
     current_user: Annotated[UserDb, Depends(get_current_user)]
 ):
     return current_user
-    
+
 
 @router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
 def read_users(
