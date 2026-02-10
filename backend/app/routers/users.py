@@ -177,4 +177,8 @@ def read_user(
     user = get_user_db(username=username, session=session)
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    return user        
+    return user
+
+# Criar endpoint para deletar usuário
+# Criar endpoint para atualizar usuário
+# Adicionar no model a opção de adicionar imagem para foto de perfil do usuário       
