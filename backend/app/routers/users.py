@@ -124,7 +124,6 @@ def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
     db_user = UserDb(
         username=user.username,
         full_name=user.full_name,
-        age = user.age,
         hashed_password=hashed_password
     )
     session.add(db_user)
