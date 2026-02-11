@@ -1,4 +1,5 @@
 import { Pizza } from "lucide-react"
+import { Link } from "react-router-dom"
 
 const SignUp = () => {
   return (
@@ -15,16 +16,17 @@ const SignUp = () => {
       </div>
 
       <div className="flex flex-col w-full gap-2">
+
+        <label htmlFor="username">Nome de usuário</label>
+        <input type="text" id="username" placeholder="joaolucasalves010" className="border p-2 rounded-xl outline-none"/>
+
         <label htmlFor="fullName">Nome completo</label>
         <input type="text" id="fullName" placeholder="João Lucas Lima Alves" className="border p-2 rounded-xl outline-none"/>
-                
-        <label htmlFor="email">Email</label>
-        <input type="email" id="email" placeholder="exemplo@gmail.com" className="border p-2 rounded-xl" />
 
         <label htmlFor="password">Senha</label>
         <input type="password" placeholder="******" className="border p-2 rounded-xl" />
 
-        <label htmlFor="confirmPassword">Confirme sua senha:</label>
+        <label htmlFor="confirmPassword">Confirme sua senha</label>
         <input type="password" id="confirmPassword" placeholder="******" className="border p-2 rounded-xl"/>    
           
         <button type="submit" className="bg-orange-500 rounded-xl p-2 text-white cursor-pointer hover:opacity-80 duration-200 ease-linear mt-5">Criar conta</button>
@@ -33,7 +35,7 @@ const SignUp = () => {
       <p className="text-center">
         <span>
           Já possui uma conta?
-          <a href="/signin" className="text-orange-500 font-bold"> Entrar</a>
+          <Link className="text-orange-500 font-bold ml-1 hover:opacity-85 transition ease-linear" to="/auth/signin">Entrar</Link>
         </span>
       </p>
     </form>
