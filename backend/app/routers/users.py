@@ -181,4 +181,4 @@ def read_user(
 
 # Criar endpoint para deletar usuário
 # Criar endpoint para atualizar usuário
-# Adicionar no model a opção de adicionar imagem para foto de perfil do usuário       
+# Adicionar no model a opção de adicionar imagem para foto de perfil do usuário
