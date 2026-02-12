@@ -15,7 +15,7 @@ const Footer = () => {
             </h2>
 
             <p className="text-sm text-white/80 flex items-center gap-1">
-              Criado com <Heart size={14} className="text-red-300" /> por João Lucas Alves
+              Criado com <Heart size={14} className="text-red-300" /> por João Lucas Lima Alves
             </p>
 
             <p className="text-xs text-white/60 max-w-sm">
