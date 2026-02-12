@@ -6,6 +6,8 @@ import api from "../services/api"
 
 import { useState } from "react"
 
+import { useNavigate } from "react-router-dom"
+
 
 const SignUp = () => {
 
@@ -16,6 +18,8 @@ const SignUp = () => {
   const [usernameExists, setUsernameExists] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  const navigate = useNavigate()
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
@@ -32,6 +36,12 @@ const SignUp = () => {
         "full_name": fullName,
         "password": password
       })
+
+      if (res.status === 201) {
+        navigate(`/auth/success/${username}`)
+      }
+
+      console.log(res.data)
 
     } catch (err: any) {
       if (err.response?.status === 409) {
