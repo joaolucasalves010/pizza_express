@@ -9,9 +9,7 @@ app = FastAPI()
 app.include_router(users.router)
 
 origins = [
-    "localhost:5173",
-    "127.0.0.1:5173",
-    "localhost"
+    "*"
 ]
 
 app.add_middleware(
