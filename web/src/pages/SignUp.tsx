@@ -1,7 +1,16 @@
 import { Pizza } from "lucide-react"
 import { Link } from "react-router-dom"
+import api from "../services/api"
+
+import { useState } from "react"
 
 const SignUp = () => {
+
+  const [username, setUsername] = useState("")
+  const [fullName, setFullName] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+
   return (
     <form className="flex flex-col gap-2 md:max-w-[512px] w-full bg-gray-50 shadow-2xl shadow-gray-400 rounded-xl p-6">
 
