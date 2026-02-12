@@ -42,8 +42,8 @@ const SignIn = () => {
     <form className="flex flex-col gap-2 md:max-w-[512px] w-full bg-gray-50 shadow-2xl shadow-gray-400 rounded-xl p-6" onSubmit={handleSubmit}>
 
       <div>
-        <div className="w-full flex items-center justify-center hover:transform hover:scale-110 transition-transform duration-200 cursor-pointer">
-          <div className="max-w-[62px] p-4 rounded-full bg-orange-500">
+        <div className="w-full flex items-center justify-center hover:transform hover:scale-110 transition-transform duration-200">
+          <div className="max-w-[62px] p-4 rounded-full bg-orange-500 cursor-pointer">
             <User size={30} className="text-white"/>
           </div>
         </div>

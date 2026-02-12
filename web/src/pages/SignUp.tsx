@@ -57,9 +57,9 @@ const SignUp = () => {
     <form className="flex flex-col gap-2 md:max-w-[512px] w-full bg-gray-50 shadow-2xl shadow-gray-400 rounded-xl p-6" onSubmit={handleSubmit}>
 
       <div>
-        <div className="w-full flex items-center justify-center hover:transform hover:scale-110 transition-transform duration-200 cursor-pointer">
+        <div className="w-full flex items-center justify-center hover:transform hover:scale-110 transition-transform duration-200">
           <div className="max-w-[62px] p-4 rounded-full bg-orange-500">
-            <Pizza size={30} className="text-white"/>
+            <Pizza size={30} className="text-white cursor-pointer"/>
           </div>
         </div>
         <h1 className="text-center text-2xl font-semibold">Pizza Express</h1>
@@ -69,7 +69,7 @@ const SignUp = () => {
       <div className="flex flex-col w-full gap-2">
 
         <label htmlFor="username">Nome de usuário</label>
-        <input type="text" id="username" placeholder="joaolucasalves010" className="border p-2 rounded-xl focus:outline-orange-500" value={username} onChange={(e) => setUsername(e.target.value)} required/>
+        <input type="text" id="username" placeholder="joaolucasalves010" className="border p-2 rounded-xl focus:outline-orange-500" value={username} onChange={(e) => setUsername(e.target.value)} minLength={6} required/>
         {usernameExists && <span className="text-red-500 font-semibold">Nome de usuário já existe!</span>}
 
         <label htmlFor="fullName">Nome completo</label>
