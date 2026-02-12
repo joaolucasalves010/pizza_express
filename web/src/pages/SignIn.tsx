@@ -5,20 +5,21 @@ import React from "react"
 import { useState} from "react"
 
 import api from "../services/api"
+import { Spinner } from "../components/Spinner"
 
 const SignIn = () => {
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
 
     if (!username || !password) return
 
-    console.log(username, password)
-
     try {
+      setIsLoading(true)
       const res = await api.post("/auth/login", {
         "username": username,
         "password": password
@@ -31,6 +32,8 @@ const SignIn = () => {
       console.log(res.data)
     } catch (err: any) {
       console.log(err)
+    } finally {
+      setIsLoading(false)
     }
 
   }
@@ -50,12 +53,16 @@ const SignIn = () => {
 
       <div className="flex flex-col gap-2 w-full">
         <label htmlFor="username">Nome de usuário</label>
-        <input type="text" id="username" placeholder="joaolucasalves010" className="border p-2 rounded-xl outline-none" onChange={(e) => setUsername(e.target.value)}/>
+        <input type="text" id="username" placeholder="joaolucasalves010" className="border p-2 rounded-xl focus:outline-orange-500" value={username} required onChange={(e) => setUsername(e.target.value)}/>
 
         <label htmlFor="password">Senha</label>
-        <input type="password" placeholder="******" className="border p-2 rounded-xl outline-none" onChange={(e) => setPassword(e.target.value)}/>
+        <input type="password" placeholder="******" className="border p-2 rounded-xl focus:outline-orange-500" value={password} required onChange={(e) => setPassword(e.target.value)}/>
 
-        <button type="submit" className="bg-orange-500 rounded-xl p-2 text-white cursor-pointer hover:opacity-80 duration-200 ease-linear mt-5">Entrar</button>
+        {isLoading ? (
+          <div className="flex justify-center mt-5">
+            <Spinner />
+          </div>
+        ) : <button type="submit" className="bg-orange-500 rounded-xl p-2 text-white cursor-pointer hover:opacity-80 duration-200 ease-linear mt-5">Entrar</button>}
       </div>
 
       <p className="text-center">
@@ -64,7 +71,6 @@ const SignIn = () => {
           <Link className="text-orange-500 font-bold ml-1 hover:opacity-85 transition ease-linear" to="/auth/signup">Cadastrar-se</Link>
         </span>
       </p>
-
     </form>
   )
 }
