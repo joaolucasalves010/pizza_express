@@ -120,6 +120,9 @@ def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
 
     verify_existing_username(user.username, session)
 
+    if len(user.password) < 6:
+        raise HTTPException(status_code=422, detail="A senha não pode ser menor do que 6 caracters")
+
     hashed_password = get_password_hash(user.password)
     db_user = UserDb(
         username=user.username,
