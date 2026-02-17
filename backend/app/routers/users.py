@@ -6,17 +6,15 @@ from dotenv import load_dotenv
 import os
 
 import jwt
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 
 from sqlmodel import select
-
 from sqlalchemy import func
 
 from datetime import timedelta, datetime, timezone
 
-# Importando todas as classes SQLMODEL
 from models.token import *
 from models.user import *
 from models.orders import *
@@ -26,23 +24,16 @@ router = APIRouter()
 
 load_dotenv()
 
-"""
-
-Para gerar sua SECRET_KEY, abra um terminal Linux e digite o comando "openssl rand -hex 32" (O terminal pode ser o git bash)
-crie um arquivo .env e adicione uma variável SECRET_KEY com o valor gerado pelo terminal linux
-
-"""
-
 SECRET_KEY = os.environ["SECRET_KEY"]
 
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY NÃO DEFINIDA!")
 
-ALGORITHM = "HS256" # Algoritmo de assinatura
-ACCESS_TOKEN_EXPIRE_MINUTES = 30 # Tempo em minutos de expiração do token
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 password_hash = PasswordHash.recommended()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+security = HTTPBearer()
 
 def get_password_hash(password):
     return password_hash.hash(password)
@@ -57,7 +48,7 @@ def verify_existing_username(username: str, session: SessionDep):
     ).one_or_none()
     
     if user is not None:
-        raise HTTPException(status_code=409, detail="Esse nome de usuário já está em uso") # Nome de usuário já existe
+        raise HTTPException(status_code=409, detail="Esse nome de usuário já está em uso")
 
 def get_user_db(username: str, session: SessionDep):
     clean_username = username.lower().strip()
@@ -67,7 +58,7 @@ def get_user_db(username: str, session: SessionDep):
     return user
 
 def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: SessionDep,
 ):
     credentials_exception = HTTPException(
@@ -77,6 +68,7 @@ def get_current_user(
     )
 
     try:
+        token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         
         username = payload.get("username")
@@ -84,6 +76,7 @@ def get_current_user(
         
         if username is None or full_name is None:
             raise credentials_exception
+        
         token_data = TokenData(username=username, full_name=full_name)
     
     except InvalidTokenError:
@@ -92,6 +85,7 @@ def get_current_user(
     user = get_user_db(session=session, username=token_data.username)
     if user is None:
         raise credentials_exception
+    
     return user
 
 def authenticate_user(session: SessionDep, username: str, password: str):
@@ -117,7 +111,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 @router.post("/users/", tags=["users"])
 def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
-
     verify_existing_username(user.username, session)
 
     if len(user.password) < 6:
@@ -146,7 +139,7 @@ def login_for_access_token(
             detail="Nome de usuário ou senha incorreto",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    access_token_expires = timedelta(ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"username": user.username, "full_name": user.full_name},
         expires_delta=access_token_expires
@@ -159,11 +152,9 @@ def read_users_me(
 ):
     return current_user
 
-
 @router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
 def read_users(
-    session: SessionDep, 
-    token: Annotated[str, Depends(oauth2_scheme)],
+    session: SessionDep,
     current_user: Annotated[UserDb, Depends(get_current_user)]
 ):
     users = session.exec(select(UserDb)).all()
@@ -173,14 +164,9 @@ def read_users(
 def read_user(
     username: str,
     session: SessionDep,
-    token: Annotated[str, Depends(oauth2_scheme)],
     current_user: Annotated[UserDb, Depends(get_current_user)],
-): 
+):
     user = get_user_db(username=username, session=session)
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     return user
-
-# Criar endpoint para deletar usuário
-# Criar endpoint para atualizar usuário
-# Adicionar no model a opção de adicionar imagem para foto de perfil do usuário
