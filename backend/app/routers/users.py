@@ -57,15 +57,17 @@ def get_user_db(username: str, session: SessionDep):
     ).one_or_none()
     return user
 
+credentials_exception = HTTPException(
+    status_code=401,
+    detail="Credenciais inválidas",
+    headers={"WWW-Authenticate": "Bearer"},
+ )
+
+
 def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: SessionDep,
 ):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Credenciais inválidas",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
 
     try:
         token = credentials.credentials
@@ -168,5 +170,19 @@ def read_user(
 ):
     user = get_user_db(username=username, session=session)
     if user is None:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise credentials_exception
     return user
+    
+@router.delete("/users/", tags=['users'])
+def delete_user(
+    session: SessionDep,
+    current_user: Annotated[UserDb, Depends(get_current_user)]
+):
+    if not current_user:
+        raise credentials_exception
+    
+    session.delete(current_user)
+    session.commit()
+    return JSONResponse(content={"message": f"Usuário {current_user.username} deletado com sucesso!"})
+
+@router.patch("/users/", tags=['users'], response_model=UserPublic)

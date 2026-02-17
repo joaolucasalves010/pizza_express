@@ -27,4 +27,4 @@ def on_startup():
 
 @app.get("/", tags=["main"])
 def root():
-    return {"detail": "Hello World"}
+    return {"detail": "Api pizza express"}
