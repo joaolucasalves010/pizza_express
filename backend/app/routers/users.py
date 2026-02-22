@@ -154,7 +154,7 @@ def read_users_me(
 ):
     return current_user
 
-@router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
+@router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic], include_in_schema=False)
 def read_users(
     session: SessionDep,
     current_user: Annotated[UserDb, Depends(get_current_user)]
@@ -162,7 +162,7 @@ def read_users(
     users = session.exec(select(UserDb)).all()
     return users
 
-@router.get("/users/{username}", response_model=UserPublic, tags=["users"])
+@router.get("/users/{username}", response_model=UserPublic, tags=["users"], include_in_schema=False)
 def read_user(
     username: str,
     session: SessionDep,
@@ -184,5 +184,3 @@ def delete_user(
     session.delete(current_user)
     session.commit()
     return JSONResponse(content={"message": f"Usuário {current_user.username} deletado com sucesso!"})
-
-@router.patch("/users/", tags=['users'], response_model=UserPublic)
