@@ -12,9 +12,9 @@ from models.orders import *
 ROOT_PATH = Path(__file__).parent.parent
 load_dotenv()
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+DB_URL = os.environ["DB_URL"]
 
-engine = create_engine(DATABASE_URL, echo=True) # mostra as consultas na tela
+engine = create_engine(DB_URL, echo=True) # mostra as consultas na tela
 
 def get_session():
     with Session(engine) as session:
