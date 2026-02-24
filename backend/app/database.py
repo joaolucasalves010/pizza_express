@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from models.user import * # Importando todas as classes SQLMODEL
 from models.orders import *
 
-ROOT_PATH = Path(__file__).parent.parent
 load_dotenv()
 
 DB_URL = os.environ["DB_URL"]
