@@ -4,6 +4,7 @@ import SignUp from "./pages/SignUp"
 import AuthLayout from "./components/AuthLayout"
 import AccountCreationSuccess from "./pages/AccountCreationSuccess"
 import ErrorPage from "./pages/ErrorPage"
+import Home from "./pages/Home"
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="success/:username" element={<AccountCreationSuccess />}/>
         </Route>
 
+          <Route path="/" element={<Home />}/>      
           <Route path="*" element={<ErrorPage />}/>
       </Routes>
     </BrowserRouter>
