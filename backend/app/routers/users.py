@@ -50,7 +50,13 @@ def verify_existing_username(username: str, session: SessionDep):
     if user is not None:
         raise HTTPException(status_code=409, detail="Esse nome de usuário já está em uso")
 
-def get_user_db(username: str, session: SessionDep):
+def get_user_db(user_id: int, session: SessionDep):
+    user = session.exec(
+        select(UserDb).where(UserDb.id == user_id)
+    ).one_or_none()
+    return user
+
+def get_user_db_by_username(username: str, session: SessionDep):
     clean_username = username.lower().strip()
     user = session.exec(
         select(UserDb).where(func.lower(UserDb.username) == clean_username)
@@ -84,7 +90,7 @@ def get_current_user(
     except InvalidTokenError:
         raise credentials_exception
     
-    user = get_user_db(session=session, username=token_data.username)
+    user = get_user_db_by_username(session=session, username=token_data.username)
     if user is None:
         raise credentials_exception
     
@@ -154,27 +160,35 @@ def read_users_me(
 ):
     return current_user
 
-@router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic], include_in_schema=False)
+@router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
 def read_users(
     session: SessionDep,
     current_user: Annotated[UserDb, Depends(get_current_user)]
 ):
+    
+    if current_user.role != "admin":
+        raise HTTPException(detail="Você não tem autorização de realizar essa chamada", status_code=401)
+    
     users = session.exec(select(UserDb)).all()
     return users
 
-@router.get("/users/{username}", response_model=UserPublic, tags=["users"], include_in_schema=False)
+@router.get("/users/{user_id}", response_model=UserPublic, tags=["users"])
 def read_user(
-    username: str,
+    user_id: int,
     session: SessionDep,
     current_user: Annotated[UserDb, Depends(get_current_user)],
 ):
-    user = get_user_db(username=username, session=session)
+    
+    if current_user.role != "admin":
+        raise HTTPException(detail="Você não tem autorização de realizar essa chamada", status_code=401)
+
+    user = get_user_db(user_id=user_id, session=session)
     if user is None:
         raise credentials_exception
     return user
     
 @router.delete("/users/", tags=['users'])
-def delete_user(
+def delete_user_me(
     session: SessionDep,
     current_user: Annotated[UserDb, Depends(get_current_user)]
 ):
@@ -184,3 +198,21 @@ def delete_user(
     session.delete(current_user)
     session.commit()
     return JSONResponse(content={"message": f"Usuário {current_user.username} deletado com sucesso!"})
+
+@router.delete("/users/{user_id}", tags=['users'])
+def delete_user(
+    session: SessionDep,
+    current_user: Annotated[UserDb, Depends(get_current_user)],
+    user_id: int
+):
+    if current_user.role != "admin":
+        raise HTTPException(detail="você não tem autorização para realizar essa chamada", status_code=401)
+    
+    user = get_user_db(user_id=user_id, session=session)
+
+    if user is None:
+        raise HTTPException(detail="esse usuário não existe", status_code=404)
+    
+    session.delete(user)
+    session.commit()
+    return JSONResponse(content={"message": f"Usuário {user.username} deletado com sucesso!"})
