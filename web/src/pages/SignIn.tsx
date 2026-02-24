@@ -1,5 +1,5 @@
 import { User } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import React from "react"
 
 import { useState} from "react"
@@ -12,6 +12,8 @@ const SignIn = () => {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+
+  const navigate = useNavigate()
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
@@ -26,12 +28,15 @@ const SignIn = () => {
       })
 
       if (res.status != 200) {
-        console.log("")
+        console.log("Algo deu de errado")
       }
 
       console.log(res.data)
+
+      navigate("/")
     } catch (err: any) {
       console.log(err)
+      setIsLoading(false)
     } finally {
       setIsLoading(false)
     }
