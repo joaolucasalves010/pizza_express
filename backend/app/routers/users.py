@@ -96,6 +96,10 @@ def get_current_user(
     
     return user
 
+def user_role_verify(user: UserDb):
+    if user.role != "admin":
+        raise HTTPException(detail="Você não tem autorização de realizar essa chamada", status_code=401)
+
 def authenticate_user(session: SessionDep, username: str, password: str):
     clean_username = username.lower().strip()
     user = session.exec(
@@ -166,8 +170,7 @@ def read_users(
     current_user: Annotated[UserDb, Depends(get_current_user)]
 ):
     
-    if current_user.role != "admin":
-        raise HTTPException(detail="Você não tem autorização de realizar essa chamada", status_code=401)
+    user_role_verify(current_user)
     
     users = session.exec(select(UserDb)).all()
     return users
@@ -179,8 +182,7 @@ def read_user(
     current_user: Annotated[UserDb, Depends(get_current_user)],
 ):
     
-    if current_user.role != "admin":
-        raise HTTPException(detail="Você não tem autorização de realizar essa chamada", status_code=401)
+    user_role_verify(current_user)
 
     user = get_user_db(user_id=user_id, session=session)
     if user is None:
@@ -205,8 +207,7 @@ def delete_user(
     current_user: Annotated[UserDb, Depends(get_current_user)],
     user_id: int
 ):
-    if current_user.role != "admin":
-        raise HTTPException(detail="você não tem autorização para realizar essa chamada", status_code=401)
+    user_role_verify(current_user)
     
     user = get_user_db(user_id=user_id, session=session)
 
