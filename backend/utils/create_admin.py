@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 import os
 
-from sqlmodel import SQLModel, Session, create_engine, Field
+from sqlmodel import SQLModel, Session, create_engine, Field, select
+from sqlalchemy import func
 
 from pwdlib import PasswordHash
 
@@ -34,8 +35,18 @@ password_hash = PasswordHash.recommended()
 def get_password_hash(password):
     return password_hash.hash(password)
 
+def verify_existing_username(username: str, session: Session): # Verificando nome de usuário
+    clean_username = username.lower().strip()
+    user = session.exec(
+        select(UserDb).where(func.lower(UserDb.username) == clean_username)
+    ).one_or_none()
+    
+    if user is not None:
+        raise Exception("Esse nome de usuário já está em uso!")
+
 def create_admin_user(user: User):
     with Session(engine) as session:
+      verify_existing_username(user.username, session=session)
       hashed_password = get_password_hash(user.password)
 
       db_user = UserDb(hashed_password=hashed_password, username = user.username, full_name = user.full_name, role = "admin")
