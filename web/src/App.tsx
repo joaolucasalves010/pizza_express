@@ -5,6 +5,7 @@ import AuthLayout from "./components/AuthLayout"
 import AccountCreationSuccess from "./pages/AccountCreationSuccess"
 import ErrorPage from "./pages/ErrorPage"
 import Home from "./pages/Home"
+import CreateProduct from "./pages/CreateProduct"
 
 function App() {
   return (
@@ -14,6 +15,10 @@ function App() {
           <Route path="signup" element={<SignUp />}/>
           <Route path="signin" element={<SignIn />}/>
           <Route path="success/:username" element={<AccountCreationSuccess />}/>
+        </Route>
+
+        <Route path="/products/">
+          <Route path="create_product" element={<CreateProduct />} />
         </Route>
 
           <Route path="/" element={<Home />}/>      
