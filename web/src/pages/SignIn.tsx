@@ -1,6 +1,6 @@
 import { User } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
-import React from "react"
+import React, { useEffect } from "react"
 
 import { useState} from "react"
 
@@ -8,6 +8,10 @@ import api from "../services/api"
 import { Spinner } from "../components/Spinner"
 
 const SignIn = () => {
+
+  useEffect(() => {
+    document.title = "Login | Pizza Express"
+  }, [])
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -58,10 +62,10 @@ const SignIn = () => {
 
       <div className="flex flex-col gap-2 w-full">
         <label htmlFor="username">Nome de usuário</label>
-        <input type="text" id="username" placeholder="joaolucasalves010" className="border p-2 rounded-xl focus:outline-orange-500" value={username} required onChange={(e) => setUsername(e.target.value)}/>
+        <input type="text" id="username" placeholder="Digite seu nome de usuário" className="border p-2 rounded-xl focus:outline-orange-500" value={username} required onChange={(e) => setUsername(e.target.value)}/>
 
         <label htmlFor="password">Senha</label>
-        <input type="password" placeholder="******" className="border p-2 rounded-xl focus:outline-orange-500" value={password} required onChange={(e) => setPassword(e.target.value)}/>
+        <input type="password" placeholder="Digite sua senha" className="border p-2 rounded-xl focus:outline-orange-500" value={password} required onChange={(e) => setPassword(e.target.value)}/>
 
         {isLoading ? (
           <div className="flex justify-center mt-5">
