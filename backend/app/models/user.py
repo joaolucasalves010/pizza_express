@@ -15,6 +15,7 @@ class UserDb(UserBase, table=True):
     id: int | None = Field(primary_key=True, default=None)
     hashed_password: str
     role: str = Field(index=True, default="client")
+    image_url: str | None = None
 
 class UserLogin(SQLModel):
     username: str = Field(index=True)

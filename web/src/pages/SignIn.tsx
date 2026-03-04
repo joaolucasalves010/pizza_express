@@ -5,7 +5,9 @@ import React, { useEffect } from "react"
 import { useState} from "react"
 
 import api from "../services/api"
-import { Spinner } from "../components/Spinner"
+
+import Input from "../components/Input"
+import { Spinner } from "@/components/ui/spinner"
 
 const SignIn = () => {
 
@@ -62,14 +64,14 @@ const SignIn = () => {
 
       <div className="flex flex-col gap-2 w-full">
         <label htmlFor="username">Nome de usuário</label>
-        <input type="text" id="username" placeholder="Digite seu nome de usuário" className="border p-2 rounded-xl focus:outline-orange-500" value={username} required onChange={(e) => setUsername(e.target.value)}/>
+        <Input type="text" id="username" placeholder="Digite seu nome de usuário" value={username} required onChange={(e) => setUsername(e.target.value)} />
 
         <label htmlFor="password">Senha</label>
-        <input type="password" placeholder="Digite sua senha" className="border p-2 rounded-xl focus:outline-orange-500" value={password} required onChange={(e) => setPassword(e.target.value)}/>
+        <Input type="password" placeholder="Digite sua senha" value={password} required onChange={(e) => setPassword(e.target.value)} />
 
         {isLoading ? (
           <div className="flex justify-center mt-5">
-            <Spinner />
+            <Spinner className="size-5 text-orange-500"/>
           </div>
         ) : <button type="submit" className="bg-orange-500 rounded-xl p-2 text-white cursor-pointer hover:opacity-80 duration-200 ease-linear mt-5">Entrar</button>}
       </div>

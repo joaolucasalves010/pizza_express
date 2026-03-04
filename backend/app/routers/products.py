@@ -13,10 +13,19 @@ from models.product import Product, ProductPublic
 from pathlib import Path
 import os
 
+from sqlmodel import select
+
 router = APIRouter()
 
 ROOT_PATH = Path(__file__).parent.parent
 IMAGEDIR = os.path.join(ROOT_PATH, "uploads", "products", "images")
+
+@router.get("/products/", tags=["products"])
+async def read_products(
+    session: SessionDep
+):
+    products = session.exec(select(Product)).all()
+    return products
 
 @router.post("/products/", tags=["products"])
 async def create_product(

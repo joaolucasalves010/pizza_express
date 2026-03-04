@@ -29,8 +29,9 @@ app.add_middleware(
     allow_headers=["Access-Control-Allow-Headers", "Content-Type", "Authorization", "Access-Control-Allow-Origin","Set-Cookie"],
 )
 
-os.makedirs(IMAGEDIR, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=IMAGEDIR), name="uploads")
+UPLOADS_DIR = os.path.join(Path(__file__).parent, "uploads")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 @app.on_event("startup")
 def on_startup():

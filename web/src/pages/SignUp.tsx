@@ -1,12 +1,14 @@
 import { Pizza } from "lucide-react"
 import { Link } from "react-router-dom"
-import { Spinner } from "../components/Spinner"
 
 import api from "../services/api"
 
 import { useEffect, useState } from "react"
 
 import { useNavigate } from "react-router-dom"
+
+import Input from "../components/Input"
+import { Spinner } from "@/components/ui/spinner"
 
 
 const SignUp = () => {
@@ -73,22 +75,22 @@ const SignUp = () => {
       <div className="flex flex-col w-full gap-2">
 
         <label htmlFor="username">Nome de usuário</label>
-        <input type="text" id="username" placeholder="Digite seu nome de usuário" className="border p-2 rounded-xl focus:outline-orange-500" value={username} onChange={(e) => setUsername(e.target.value)} minLength={6} required/>
+        <Input type="text" id="username" placeholder="Digite seu nome de usuário" value={username} onChange={(e) => setUsername(e.target.value)} minLength={6} required/>
         {usernameExists && <span className="text-red-500 font-semibold">Nome de usuário já existe!</span>}
 
         <label htmlFor="fullName">Nome completo</label>
-        <input type="text" id="fullName" placeholder="Seu nome completo" className="border p-2 rounded-xl focus:outline-orange-500" value={fullName} onChange={(e) => setFullName(e.target.value)} required/>
+        <Input type="text" id="fullName" placeholder="Seu nome completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required/>
 
         <label htmlFor="password">Senha</label>
-        <input type="password" placeholder="Digite sua senha" className="border p-2 rounded-xl focus:outline-orange-500" minLength={6} onChange={(e) => setPassword(e.target.value)} value={password} required />
+        <Input type="password" placeholder="Digite sua senha" minLength={6} onChange={(e) => setPassword(e.target.value)} value={password} required />
 
         <label htmlFor="confirmPassword">Confirme sua senha</label>
-        <input type="password" id="confirmPassword" placeholder="Confirme sua senha" className="border p-2 rounded-xl focus:outline-orange-500" minLength={6} onChange={(e) => setConfirmPassword(e.target.value)} value={confirmPassword} required/>
+        <Input type="password" id="confirmPassword" placeholder="Confirme sua senha" minLength={6} onChange={(e) => setConfirmPassword(e.target.value)} value={confirmPassword} required />
         {passwordError && <span className="text-red-500 font-semibold">As senhas não coincidem!</span>}
         
         {isLoading ? (
           <div className="flex justify-center mt-5">
-            <Spinner />
+            <Spinner className="size-5 text-orange-500"/>
           </div>
         ) 
         : <button type="submit" className="bg-orange-500 rounded-xl p-2 text-white cursor-pointer hover:opacity-80 duration-200 ease-linear mt-5">Criar conta</button>}

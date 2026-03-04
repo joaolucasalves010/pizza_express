@@ -25,10 +25,13 @@ const Header = () => {
             </li>
           </ul>
           <div className="flex gap-4 items-center">
-            <ShoppingCart 
-            size={25} 
-            className="cursor-pointer hover:scale-105 ease-linear duration-110" 
-            />
+            <div className="flex items-center gap-2 sm:bg-amber-400 p-2 rounded-xl sm:text-black cursor-pointer hover:opacity-95 hover:scale-102 duration-200">
+              <ShoppingCart 
+              size={25} 
+              className="hover:scale-105 ease-linear duration-110" 
+              />
+              <p className="text-bold hidden sm:block">Carrinho</p>  
+            </div>
             <CircleUser
               size={25}
               className="cursor-pointer hover:scale-105 ease-linear duration-110"
