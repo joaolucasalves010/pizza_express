@@ -5,13 +5,24 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import LoadingPage from "./LoadingPage";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom" 
+
+import  { ShoppingCart } from "lucide-react"
+import { UserContext } from "@/contexts/UserContext";
 
 const Home = () => {
+
+  const navigate = useNavigate()
+
+  const { setUser } = useContext(UserContext)!
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+
+    document.title = "Pizza Express | Home"
+
     setIsLoading(true);
 
     const getProducts = async () => {
@@ -20,7 +31,7 @@ const Home = () => {
 
         if (res.status === 200) {
           setProducts(res.data);
-          console.log(res.data);
+
         }
       } catch (err: any) {
         console.log(err);
@@ -29,6 +40,24 @@ const Home = () => {
       }
     };
 
+    const getUser = async () => {
+      try {
+        const res = await api.get("/auth/me", {withCredentials: true})
+        
+        if (res.status === 200) {
+          setUser(res.data)
+        }
+
+      } catch (err: any) {
+        if (err.response?.status === 401) {
+          navigate("/auth/signin")
+        }
+      }
+      finally {
+        console.log("Finalizado")
+      }
+    }
+    getUser()
     getProducts();
   }, []);
 
@@ -59,7 +88,8 @@ const Home = () => {
           {products.map((product) => (
             <div
               key={product.id}
-              className="bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 w-full max-w-4xl mx-auto my-4"
+              className="bg-white rounded-2xl shadow-md hover:shadow-lg transition duration-300 p-4 w-full max-w-4xl mx-auto my-4 hover:scale-102"
+              id="cardapio"
             >
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Imagem */}
@@ -86,7 +116,8 @@ const Home = () => {
                       R$ {Number(product.price).toFixed(2)}
                     </span>
 
-                    <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
+                    <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2 hover:scale-102 duration-300 cursor-pointer">
+                      <ShoppingCart />
                       Adicionar
                     </button>
                   </div>
@@ -94,6 +125,11 @@ const Home = () => {
               </div>
             </div>
           ))}
+          {products.length == 0 && (
+            <div>
+              <p className="text-lg">Nenhum produto encontrado!</p>
+            </div>
+          )}
         </div>
       </main>
 
