@@ -1,7 +1,16 @@
-import { CircleUser, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
+
+import UserIcon from "../assets/user_default.png"
+
 import { Pizza } from "lucide-react";
+import { useContext } from "react";
+import { UserContext } from "@/contexts/UserContext";
 
 const Header = () => {
+
+  const {user} = useContext(UserContext)!
+
   return (
     <>
       <header className="bg-red-600 text-white sticky">
@@ -12,7 +21,7 @@ const Header = () => {
           </div>
           <ul className="hidden md:flex gap-5">
             <li className="cursor-pointer hover:scale-105 ease-linear duration-110">
-              <a href="#">Cardápio</a>
+              <a href="#cardapio">Cardápio</a>
             </li>
             <li className="cursor-pointer hover:scale-105 ease-linear duration-110">
               <a href="#">Promoções</a>
@@ -32,10 +41,24 @@ const Header = () => {
               />
               <p className="text-bold hidden sm:block">Carrinho</p>  
             </div>
-            <CircleUser
-              size={25}
-              className="cursor-pointer hover:scale-105 ease-linear duration-110"
-            />
+            {user?.image_url ? (
+              <Avatar size="lg" className="cursor-pointer hover:scale-105 duration-300">
+                <AvatarImage
+                  src={`http://localhost:8000${user?.image_url}`}
+                  alt="@user"
+                />
+                <AvatarFallback>@{user.username}</AvatarFallback>
+              </Avatar>
+            ): (
+              <Avatar size="lg" className="cursor-pointer hover:scale-105 duration-300">
+                <AvatarImage
+                  src={UserIcon}
+                  alt="@user"
+                  className="grayscale"
+                />
+                <AvatarFallback>User</AvatarFallback>
+              </Avatar>
+            )}
           </div>
         </nav>
       </header>
