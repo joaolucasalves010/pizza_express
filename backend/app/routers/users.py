@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, UploadFile, File, Cookie
 from fastapi.responses import JSONResponse, Response
 from typing import Annotated
 
@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import os
 
 import jwt
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 
@@ -20,6 +19,8 @@ from models.user import *
 from models.orders import *
 from database import SessionDep
 
+from pathlib import Path
+
 router = APIRouter()
 
 load_dotenv()
@@ -30,10 +31,14 @@ if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY NÃO DEFINIDA!")
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 password_hash = PasswordHash.recommended()
-security = HTTPBearer()
+
+ROOT_PATH = Path(__file__).parent.parent
+IMAGE_USER_DIR = os.path.join(ROOT_PATH, "uploads", "users", "images")
+os.makedirs(IMAGE_USER_DIR, exist_ok=True) # Se o caminho já existir ele não executa
 
 def get_password_hash(password):
     return password_hash.hash(password)
@@ -71,12 +76,15 @@ credentials_exception = HTTPException(
 
 
 def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     session: SessionDep,
+    access_token: str | None = Cookie(None),
 ):
 
+    if not access_token:
+        raise credentials_exception
+
     try:
-        token = credentials.credentials
+        token = access_token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         
         username = payload.get("username")
@@ -88,7 +96,7 @@ def get_current_user(
         token_data = TokenData(username=username, full_name=full_name)
     
     except InvalidTokenError:
-        raise credentials_exception
+        raise HTTPException(detail="Token de acesso inválido", status_code=401)
     
     user = get_user_db_by_username(session=session, username=token_data.username)
     if user is None:
@@ -111,12 +119,18 @@ def authenticate_user(session: SessionDep, username: str, password: str):
         return False
     return user
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def create_refresh_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -140,10 +154,11 @@ def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
     return JSONResponse(status_code=201, content={"message": "Usuário criado com sucesso!"})
 
 @router.post("/auth/login", tags=["auth"])
-def login_for_access_token(
+def login(
     data: Annotated[UserLogin, Body()],
-    session: SessionDep
-) -> Token:
+    session: SessionDep,
+    response: Response,
+) -> TokenPair:
     user = authenticate_user(session, data.username, data.password)
     if not user:
         raise HTTPException(
@@ -151,12 +166,23 @@ def login_for_access_token(
             detail="Nome de usuário ou senha incorreto",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
     access_token = create_access_token(
-        data={"username": user.username, "full_name": user.full_name},
-        expires_delta=access_token_expires
+        data={"username": user.username, "full_name": user.full_name, "user_id": user.id, "user_role": user.role},
     )
-    return Token(access_token=access_token, token_type="Bearer")
+
+    refresh_token = create_refresh_token(
+        data={"user_id": user.id, "username": user.username, "full_name": user.full_name}
+    )
+
+    response.set_cookie(key="access_token", value=access_token, secure=False, httponly=True, samesite="lax")
+    response.set_cookie(key="refresh_token", value=refresh_token, secure=False, httponly=True, samesite="lax")
+
+    return TokenPair(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="Bearer Token"
+    )
 
 @router.get("/auth/me", tags=["auth"], response_model=UserPublic)
 def read_users_me(
@@ -217,3 +243,27 @@ def delete_user(
     session.delete(user)
     session.commit()
     return JSONResponse(content={"message": f"Usuário {user.username} deletado com sucesso!"})
+
+
+# ADICIONAR IMAGEM
+@router.post("/users/{user_id}/images", tags=["users"])
+async def upload_user_image(
+    current_user: Annotated[UserDb, Depends(get_current_user)],
+    file: Annotated[UploadFile, File()],
+    session: SessionDep,
+    user_id: int,
+):
+    if current_user.id != user_id and current_user.role != "admin":
+       raise HTTPException(detail="Você não possui autorização.", status_code=403) 
+    
+    user = session.get(UserDb, user_id)
+
+    file_contents = await file.read()
+
+    with open(os.path.join(IMAGE_USER_DIR, file.filename), "wb") as f:
+        f.write(file_contents)
+
+    user.image_url = f"/uploads/users/images/{file.filename}"
+    session.commit()    
+
+    return JSONResponse(content={"message": "Imagem adicionada com sucesso!"}, status_code=200)
