@@ -9,17 +9,21 @@ import api from "../services/api"
 import Input from "../components/Input"
 import { Spinner } from "@/components/ui/spinner"
 
+import { UserContext } from "@/contexts/UserContext";
+import { useContext } from "react"
+
 const SignIn = () => {
+  const navigate = useNavigate()
+  const {setUser} = useContext(UserContext)!
 
   useEffect(() => {
     document.title = "Login | Pizza Express"
+
   }, [])
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-
-  const navigate = useNavigate()
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
@@ -30,13 +34,9 @@ const SignIn = () => {
       setIsLoading(true)
       const res = await api.post("/auth/login", {
         "username": username,
-        "password": password
-      })
-
-      if (res.status != 200) {
-        console.log("Algo deu de errado")
-      }
-
+        "password": password,
+      }, {withCredentials: true})
+      
       console.log(res.data)
 
       navigate("/")
