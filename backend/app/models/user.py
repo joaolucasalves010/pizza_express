@@ -10,6 +10,7 @@ class User(UserBase):
 class UserPublic(UserBase):
     id: int | None = Field(default=None, primary_key=True)
     role: str = Field(index=True, default="client")
+    image_url: str | None = None
      
 class UserDb(UserBase, table=True):
     id: int | None = Field(primary_key=True, default=None)
