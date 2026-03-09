@@ -25,12 +25,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins = origins,
     allow_methods = ["*"], # permite todos os methods
-    # allow_credentials = True, -> Permite envio de credenciais
+    allow_credentials = True,
     allow_headers=["Access-Control-Allow-Headers", "Content-Type", "Authorization", "Access-Control-Allow-Origin","Set-Cookie"],
 )
 
 UPLOADS_DIR = os.path.join(Path(__file__).parent, "uploads")
-os.makedirs(UPLOADS_DIR, exist_ok=True)
+os.makedirs(UPLOADS_DIR, exist_ok=True) # Se o caminho já existir ele não executa
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 @app.on_event("startup")
