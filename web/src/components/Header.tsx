@@ -96,7 +96,7 @@ const Header = () => {
 
                   {user?.role === "admin" && (
                     <DropdownMenuItem>
-                      <button className="flex gap-2 items-center cursor-pointer w-full" onClick={() => navigate("/edit-user")}>
+                      <button className="flex gap-2 items-center cursor-pointer w-full" onClick={() => navigate("/dashboard")}>
                         <LayoutDashboard />
                         Dashboard
                       </button>
