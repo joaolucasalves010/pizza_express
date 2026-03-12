@@ -6,7 +6,9 @@ import AccountCreationSuccess from "./pages/AccountCreationSuccess";
 import ErrorPage from "./pages/ErrorPage";
 import Home from "./pages/Home";
 import CreateProduct from "./pages/CreateProduct";
+import Dashboard from "./pages/Dashboard";
 import { UserProvider } from "./contexts/UserContext";
+import EditUser from "./pages/EditUser";
 
 function App() {
   return (
@@ -23,9 +25,11 @@ function App() {
           </Route>
 
           <Route path="/products/">
-            <Route path="create_product" element={<CreateProduct />} />
+            <Route path="create-product" element={<CreateProduct />} />
           </Route>
 
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/edit-user" element={<EditUser />}/>
           <Route path="/" element={<Home />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>

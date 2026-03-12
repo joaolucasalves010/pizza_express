@@ -15,7 +15,7 @@ const Home = () => {
 
   const navigate = useNavigate()
 
-  const { setUser } = useContext(UserContext)!
+  const { user, setUser } = useContext(UserContext)!
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,11 +47,15 @@ const Home = () => {
         if (res.status === 200) {
           setUser(res.data)
         }
+        
+        console.log(res.data)
 
       } catch (err: any) {
         if (err.response?.status === 401) {
           navigate("/auth/signin")
         }
+
+        console.log(err)
       }
       finally {
         console.log("Finalizado")
