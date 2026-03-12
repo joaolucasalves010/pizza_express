@@ -9,6 +9,7 @@ import CreateProduct from "./pages/CreateProduct";
 import Dashboard from "./pages/Dashboard";
 import { UserProvider } from "./contexts/UserContext";
 import EditUser from "./pages/EditUser";
+import DashboardHome from "./pages/DashboardHome";
 
 function App() {
   return (
@@ -24,11 +25,10 @@ function App() {
             />
           </Route>
 
-          <Route path="/products/">
-            <Route path="create-product" element={<CreateProduct />} />
+          <Route path="/dashboard" element={<Dashboard />}>
+            <Route element={<DashboardHome />} index/>
+            <Route path="products/create" element={<CreateProduct />}/>
           </Route>
-
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/edit-user" element={<EditUser />}/>
           <Route path="/" element={<Home />} />
           <Route path="*" element={<ErrorPage />} />
