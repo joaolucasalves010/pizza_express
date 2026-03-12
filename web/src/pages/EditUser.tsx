@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { Toaster } from "sonner"
 import { toast } from "sonner"
+import useGetUser from "@/hooks/useGetUser"
 
 import { Spinner } from "@/components/ui/spinner"
 
@@ -40,6 +41,7 @@ const EditUser = () => {
   const { user, setUser } = useContext(UserContext)!
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const { getUser } = useGetUser()
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -51,21 +53,8 @@ const EditUser = () => {
   useEffect(() => {
     document.title = "Editar Perfil | Pizza Express"
 
-    const getUser = async () => {
-      try {
-        const res = await api.get("/auth/me", {withCredentials: true})
-        
-        if (res.status === 200) {
-          setUser(res.data)
-        }
-      } catch (err: any) {
-        if (err.response?.status === 401) {
-          navigate("/auth/signin")
-        }
-      }
-    }
     getUser()
-  }, [navigate, setUser])
+  }, [])
 
   useEffect(() => {
     if (user) {

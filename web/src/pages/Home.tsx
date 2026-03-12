@@ -11,11 +11,14 @@ import { useNavigate } from "react-router-dom"
 import  { ShoppingCart } from "lucide-react"
 import { UserContext } from "@/contexts/UserContext";
 
+import useGetUser from "@/hooks/useGetUser";
+
 const Home = () => {
 
   const navigate = useNavigate()
+  const { getUser } = useGetUser()
 
-  const { user, setUser } = useContext(UserContext)!
+  const { setUser } = useContext(UserContext)!
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,27 +43,6 @@ const Home = () => {
       }
     };
 
-    const getUser = async () => {
-      try {
-        const res = await api.get("/auth/me", {withCredentials: true})
-        
-        if (res.status === 200) {
-          setUser(res.data)
-        }
-        
-        console.log(res.data)
-
-      } catch (err: any) {
-        if (err.response?.status === 401) {
-          navigate("/auth/signin")
-        }
-
-        console.log(err)
-      }
-      finally {
-        console.log("Finalizado")
-      }
-    }
     getUser()
     getProducts();
   }, []);
