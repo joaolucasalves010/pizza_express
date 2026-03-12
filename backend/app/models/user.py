@@ -21,3 +21,8 @@ class UserDb(UserBase, table=True):
 class UserLogin(SQLModel):
     username: str = Field(index=True)
     password: str
+
+class UserUpdate(SQLModel):
+    username: str | None = Field(default=None)
+    full_name: str | None = Field(default=None)
+    password: str | None = Field(default=None)

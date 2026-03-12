@@ -18,7 +18,7 @@ app.include_router(users.router)
 app.include_router(products.router)
 
 origins = [
-    "*"
+    "http://localhost:5173"
 ]
 
 app.add_middleware(
@@ -26,7 +26,7 @@ app.add_middleware(
     allow_origins = origins,
     allow_methods = ["*"], # permite todos os methods
     allow_credentials = True,
-    allow_headers=["Access-Control-Allow-Headers", "Content-Type", "Authorization", "Access-Control-Allow-Origin","Set-Cookie"],
+    allow_headers=["*"],
 )
 
 UPLOADS_DIR = os.path.join(Path(__file__).parent, "uploads")

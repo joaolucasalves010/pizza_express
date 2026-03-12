@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, UploadFile, File, Cookie
-from fastapi.responses import JSONResponse, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, UploadFile, File, Cookie, Path
+from fastapi.responses import JSONResponse, Response, RedirectResponse
 from typing import Annotated
 
 from dotenv import load_dotenv
@@ -20,6 +20,7 @@ from models.orders import *
 from database import SessionDep
 
 from pathlib import Path
+import uuid
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY NÃO DEFINIDA!")
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 password_hash = PasswordHash.recommended()
@@ -74,7 +75,6 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
  )
 
-
 def get_current_user(
     session: SessionDep,
     access_token: str | None = Cookie(None),
@@ -103,10 +103,6 @@ def get_current_user(
         raise credentials_exception
     
     return user
-
-def user_role_verify(user: UserDb):
-    if user.role != "admin":
-        raise HTTPException(detail="Você não tem autorização de realizar essa chamada", status_code=401)
 
 def authenticate_user(session: SessionDep, username: str, password: str):
     clean_username = username.lower().strip()
@@ -175,14 +171,24 @@ def login(
         data={"user_id": user.id, "username": user.username, "full_name": user.full_name}
     )
 
-    response.set_cookie(key="access_token", value=access_token, secure=False, httponly=True, samesite="lax")
-    response.set_cookie(key="refresh_token", value=refresh_token, secure=False, httponly=True, samesite="lax")
+    response.set_cookie(key="access_token", value=access_token, secure=False, httponly=True, samesite="lax", path="/")
+    response.set_cookie(key="refresh_token", value=refresh_token, secure=False, httponly=True, samesite="lax", path="/")
 
     return TokenPair(
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="Bearer Token"
     )
+
+@router.get("/logout", tags=["auth"])
+def logout():
+
+    response = JSONResponse({"message": "Logout realizado"})
+
+    response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(key="refresh_token",path="/")
+
+    return response
 
 @router.get("/auth/me", tags=["auth"], response_model=UserPublic)
 def read_users_me(
@@ -196,19 +202,21 @@ def read_users(
     current_user: Annotated[UserDb, Depends(get_current_user)]
 ):
     
-    user_role_verify(current_user)
-    
+    if current_user.role != "admin":
+        raise credentials_exception
+
     users = session.exec(select(UserDb)).all()
     return users
 
 @router.get("/users/{user_id}", response_model=UserPublic, tags=["users"])
 def read_user(
-    user_id: int,
+    user_id: Annotated[int, Path()],
     session: SessionDep,
     current_user: Annotated[UserDb, Depends(get_current_user)],
 ):
     
-    user_role_verify(current_user)
+    if current_user.role != "admin":
+        raise credentials_exception
 
     user = get_user_db(user_id=user_id, session=session)
     if user is None:
@@ -231,10 +239,12 @@ def delete_user_me(
 def delete_user(
     session: SessionDep,
     current_user: Annotated[UserDb, Depends(get_current_user)],
-    user_id: int
+    user_id: Annotated[int, Path()]
 ):
-    user_role_verify(current_user)
     
+    if user_id != current_user.id and current_user.role != "admin":
+        raise credentials_exception
+
     user = get_user_db(user_id=user_id, session=session)
 
     if user is None:
@@ -244,26 +254,66 @@ def delete_user(
     session.commit()
     return JSONResponse(content={"message": f"Usuário {user.username} deletado com sucesso!"})
 
-
-# ADICIONAR IMAGEM
 @router.post("/users/{user_id}/images", tags=["users"])
 async def upload_user_image(
     current_user: Annotated[UserDb, Depends(get_current_user)],
     file: Annotated[UploadFile, File()],
     session: SessionDep,
-    user_id: int,
+    user_id: Annotated[int, Path()],
 ):
-    if current_user.id != user_id and current_user.role != "admin":
-       raise HTTPException(detail="Você não possui autorização.", status_code=403) 
     
-    user = session.get(UserDb, user_id)
+    if user_id != current_user.id and current_user.role != "admin":
+        raise credentials_exception
 
+    user = session.get(UserDb, user_id)
+    
+    if user.image_url:
+        try:
+            dir = f"{ROOT_PATH}" + user.image_url
+            os.remove(dir) 
+        except FileNotFoundError or FileExistsError:
+            user.image_url = None
+            session.commit()
+
+    extension = Path(file.filename).suffix
+    unique_filename = f"{uuid.uuid4()}{extension}"
+
+    file_path = os.path.join(IMAGE_USER_DIR, unique_filename)
     file_contents = await file.read()
 
-    with open(os.path.join(IMAGE_USER_DIR, file.filename), "wb") as f:
+
+    with open(file_path, "wb") as f:
         f.write(file_contents)
 
-    user.image_url = f"/uploads/users/images/{file.filename}"
+    user.image_url = f"/uploads/users/images/{unique_filename}"
     session.commit()    
 
     return JSONResponse(content={"message": "Imagem adicionada com sucesso!"}, status_code=200)
+
+# Editar usuário
+@router.patch("/users/{user_id}", tags=["users"])
+def update_user(current_user: Annotated[UserDb, Depends(get_current_user)], session: SessionDep, user_id: Annotated[int, Path()], user_update: Annotated[UserUpdate, Body()]):
+    if user_id != current_user.id and current_user.role != "admin":
+        raise credentials_exception
+
+    user = get_user_db(user_id=user_id, session=session)
+    if not user:
+        return HTTPException(detail="Usuário não encontrado!", status_code=404)
+    
+    if (user_update.username):
+        user.username = user_update.username
+    
+    if (user_update.full_name):
+        user.full_name = user_update.full_name
+
+    if (user_update.password):
+        updated_hashed_password = get_password_hash(user_update.password)
+
+        if (user.hashed_password == updated_hashed_password):
+            return HTTPException(detail="Utilize uma senha diferente da atual")
+        user.hashed_password = updated_hashed_password
+    
+    session.commit()
+    session.refresh(user)
+
+    return JSONResponse(content={"message": "Alterações feitas com sucesso!"}, status_code=200)

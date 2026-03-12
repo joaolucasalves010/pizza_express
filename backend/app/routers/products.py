@@ -1,11 +1,11 @@
 from typing import Annotated
 from database import SessionDep
-from fastapi import Depends, APIRouter, HTTPException, File, UploadFile
+from fastapi import Depends, APIRouter, HTTPException, File, UploadFile, Path
 from fastapi.responses import JSONResponse
 
 from models.user import *
 
-from routers.users import get_current_user, user_role_verify
+from routers.users import get_current_user, credentials_exception
 from database import SessionDep
 
 from models.product import Product, ProductPublic
@@ -33,7 +33,9 @@ async def create_product(
     session: SessionDep,
     product: ProductPublic,
 ):
-    user_role_verify(current_user)
+
+    if current_user.role != "admin":
+        raise credentials_exception
 
     product_dict = product.model_dump()
     db_product = Product(**product_dict)
@@ -41,7 +43,7 @@ async def create_product(
     session.commit()
     session.refresh(db_product)
 
-    return JSONResponse(content={"detail": "Produto criado com sucesso!"}, status_code=201)
+    return JSONResponse(content={"detail": "Produto criado com sucesso!", "product_id": db_product.id}, status_code=201)
 
 @router.post("/products/{product_id}/images", tags=["products"])
 async def upload_product_image(
@@ -50,6 +52,10 @@ async def upload_product_image(
     session: SessionDep,
     file: Annotated[UploadFile, File()]
 ):
+
+    if current_user.role != "admin":
+        raise credentials_exception
+
     product = session.get(Product, product_id)
     if product is None:
         raise HTTPException(detail="Produto não encontrado!", status_code=404)
