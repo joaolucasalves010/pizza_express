@@ -1,14 +1,16 @@
-import React from "react";
+import { UserContext } from "@/contexts/UserContext";
+import { useContext } from "react";
 
-type Props = {};
+import PizzaExpressIcon from "../../public/pizza.png"
 
-const DashboardHome = (props: Props) => {
+const DashboardHome = () => {
+
+  const { user } = useContext(UserContext)!
+
   return (
-    <div>
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-        Visão Geral
-      </h1>
-      <p className="text-gray-500 mt-1 text-sm md:text-base">
+    <div className="flex items-center justify-center flex-col">
+      <h1 className="text-4xl">Olá, <strong>{user?.full_name}!</strong></h1>
+      <p className="text-gray-500 text-xl mt-1 ">
         Bem-vindo ao painel de administração.
       </p>
     </div>

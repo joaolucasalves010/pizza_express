@@ -1,11 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import DashboardSideBar from "../components/DashboardSideBar";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "../components/ui/sidebar";
 import { Outlet } from "react-router-dom";
+import useGetUser from "@/hooks/useGetUser";
 
 const Dashboard = () => {
+  const { getUser } = useGetUser()
+
   useEffect(() => {
     document.title = "Dashboard - PizzaExpress";
+
+    getUser()
   }, []);
 
   return (

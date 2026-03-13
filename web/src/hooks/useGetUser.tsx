@@ -17,9 +17,9 @@ const useGetUser = () => {
           setUser(res.data)
         }
       } catch(err: any) {
-        if (err.response?.status === 401) {
-          navigate("/auth/signin")
-      }
+        api.get("/logout", {withCredentials: true})
+        setUser(null)
+        navigate("/auth/signin")
     }
   }
 

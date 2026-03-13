@@ -26,14 +26,14 @@ const SignIn = () => {
   useEffect(() => {
     document.title = "Login | Pizza Express"
     
-    const getUser = async () => {
+    const verifyUser = async () => {
       const res = await api.get("/auth/me", {withCredentials: true})
       if (res.status === 200) {
         navigate("/")
       }
     }
 
-    getUser()
+    verifyUser()
   }, [])
 
   const [isLoading, setIsLoading] = useState(false)

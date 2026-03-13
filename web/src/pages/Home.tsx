@@ -15,10 +15,8 @@ import useGetUser from "@/hooks/useGetUser";
 
 const Home = () => {
 
-  const navigate = useNavigate()
   const { getUser } = useGetUser()
 
-  const { setUser } = useContext(UserContext)!
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -71,9 +69,9 @@ const Home = () => {
             Cardápio
           </h1>
 
-          {products.map((product) => (
+          {products.map((product, index) => (
             <div
-              key={product.id}
+              key={index}
               className="bg-white rounded-2xl shadow-md hover:shadow-lg transition duration-300 p-4 w-full max-w-4xl mx-auto my-4 hover:scale-102"
               id="cardapio"
             >
@@ -89,7 +87,7 @@ const Home = () => {
                 <div className="flex flex-col flex-1 justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-800">
-                      {product.name}
+                      {index + 1} - {product.name}
                     </h2>
 
                     <p className="text-gray-500 text-sm mt-2 leading-relaxed">

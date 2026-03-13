@@ -30,14 +30,14 @@ const SignUp = () => {
   useEffect(() => {
     document.title = "Cadastro | Pizza Express"
     
-    const getUser = async () => {
+    const verifyUser = async () => {
       const res = await api.get("/auth/me", {withCredentials: true})
       if (res.status === 200) {
         navigate("/")
       }
     }
 
-    getUser()
+    verifyUser()
   }, [])
 
 

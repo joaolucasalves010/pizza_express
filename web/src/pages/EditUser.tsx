@@ -113,7 +113,7 @@ const onSubmit = async (data: EditUserForm) => {
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-orange-100 p-4 font-sans">
-      <div className="w-full max-w-lg bg-zinc-200 shadow-2xl rounded-3xl overflow-hidden relative">
+      <div className="w-full max-w-lg bg-white shadow-2xl rounded-3xl overflow-hidden relative">
         <form className="p-8 flex flex-col items-center gap-4" onSubmit={handleSubmit(onSubmit)}>
           
           <button type="button" onClick={() => navigate(-1)} className="border border-gray-400 hover:scale-102 absolute top-4 left-4 p-2 text-black hover:bg-zinc-400 cursor-pointer rounded-full transition">

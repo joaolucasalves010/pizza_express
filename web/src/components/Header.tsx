@@ -52,9 +52,6 @@ const Header = () => {
             <li className="cursor-pointer hover:scale-105 ease-linear duration-110">
               <a href="#">Sobre</a>
             </li>
-            <li className="cursor-pointer hover:scale-105 ease-linear duration-110">
-              <a href="#">Contato</a>
-            </li>
           </ul>
           <div className="flex gap-4 items-center">
             <div className="flex items-center gap-2 sm:bg-amber-400 p-2 rounded-xl sm:text-black cursor-pointer hover:opacity-95 hover:scale-102 duration-200">

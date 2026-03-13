@@ -58,77 +58,81 @@ const CreateProduct = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gray-200">
-      <main className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-xl bg-white shadow-2xl shadow-zinc-700 rounded-2xl p-8 border border-zinc-400">
-          <div className="flex justify-center items-center">
-            <div className="bg-orange-500 w-full rounded-full p-4 max-w-[62px]">
-              <Pizza size={30} className="text-white" />
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 py-8">
+        <div className="w-full max-w-xl bg-white shadow-lg sm:shadow-2xl sm:shadow-zinc-700 rounded-2xl p-5 sm:p-8 border border-zinc-200 sm:border-zinc-400">
+          <div className="flex justify-center items-center mb-4">
+            <div className="bg-orange-500 rounded-full p-3 sm:p-4">
+              <Pizza size={26} className="text-white" />
             </div>
           </div>
 
-          <h1 className="text-3xl font-semibold text-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-center mb-5 sm:mb-6">
             Cadastrar Novo Produto
           </h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label className="font-medium">Nome do Produto</label>
+              <label className="font-medium text-sm sm:text-base">Nome do Produto</label>
               <input
                 type="text"
                 placeholder="Ex: Pizza Calabresa"
-                className="border border-zinc-500 p-3 rounded-xl focus:outline-orange-500"
+                className="w-full border border-zinc-500 p-3 rounded-xl focus:outline-orange-500 text-sm sm:text-base"
                 {...register("name")}
               />
-              {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+              {errors.name && <span className="text-red-500 text-xs sm:text-sm">{errors.name.message}</span>}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="font-medium">Preço</label>
+              <label className="font-medium text-sm sm:text-base">Preço</label>
               <input
                 type="number"
                 step="0.01"
                 placeholder="Ex: 39.90"
-                className="border p-3 rounded-xl focus:outline-orange-500 border-zinc-500"
+                className="w-full border p-3 rounded-xl focus:outline-orange-500 border-zinc-500 text-sm sm:text-base"
                 {...register("price")}
               />
-              {errors.price && <span className="text-red-500 text-sm">{errors.price.message}</span>}
+              {errors.price && <span className="text-red-500 text-xs sm:text-sm">{errors.price.message}</span>}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="font-medium">Imagem</label>
+              <label className="font-medium text-sm sm:text-base">Imagem</label>
               <input
                 type="file"
                 accept="image/*"
-                className="border border-zinc-500 p-2 rounded-xl file:bg-orange-500 file:text-white file:border-none file:px-4 file:py-2 file:rounded-lg file:cursor-pointer"
+                className="w-full border border-zinc-500 p-2 rounded-xl text-sm sm:text-base
+                  file:bg-orange-500 file:text-white file:border-none
+                  file:px-3 file:py-1.5 sm:file:px-4 sm:file:py-2
+                  file:rounded-lg file:cursor-pointer file:text-xs sm:file:text-sm
+                  file:mr-3"
                 {...register("image")}
               />
-              {errors.image && <span className="text-red-500 text-sm">{errors.image.message as string}</span>}
+              {errors.image && <span className="text-red-500 text-xs sm:text-sm">{errors.image.message as string}</span>}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="font-medium">Descrição</label>
+              <label className="font-medium text-sm sm:text-base">Descrição</label>
               <textarea
                 placeholder="Descreva os ingredientes ou características do produto..."
-                className="border p-3 rounded-xl focus:outline-orange-500 resize-none border-zinc-500"
+                className="w-full border p-3 rounded-xl focus:outline-orange-500 resize-none border-zinc-500 text-sm sm:text-base"
                 rows={4}
                 {...register("description")}
               />
-              {errors.description && <span className="text-red-500 text-sm">{errors.description.message}</span>}
+              {errors.description && <span className="text-red-500 text-xs sm:text-sm">{errors.description.message}</span>}
             </div>
 
             <button
               type="submit"
-              className="cursor-pointer bg-orange-500 text-white py-3 rounded-xl mt-4 hover:opacity-85 transition duration-200 font-semibold flex items-center justify-center gap-2"
+              className="cursor-pointer bg-orange-500 text-white py-3 rounded-xl mt-2 sm:mt-4 hover:opacity-85 transition duration-200 font-semibold flex items-center justify-center gap-2 text-sm sm:text-base w-full"
             >
-              <PlusCircle />
+              <PlusCircle size={18} />
               Cadastrar Produto
             </button>
           </form>
         </div>
       </main>
 
-      <Toaster />
+      <Toaster position="bottom-right"/>
     </div>
   );
 };
