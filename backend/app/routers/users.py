@@ -50,7 +50,7 @@ def verify_password(simple_password, hashed_password):
 def verify_existing_username(username: str, session: SessionDep):
     clean_username = username.lower().strip()
     user = session.exec(
-        select(UserDb).where(func.lower(UserDb.username) == clean_username)
+        select(UsersDb).where(func.lower(UsersDb.username) == clean_username)
     ).one_or_none()
     
     if user is not None:
@@ -58,14 +58,14 @@ def verify_existing_username(username: str, session: SessionDep):
 
 def get_user_db(user_id: int, session: SessionDep):
     user = session.exec(
-        select(UserDb).where(UserDb.id == user_id)
+        select(UsersDb).where(UsersDb.id == user_id)
     ).one_or_none()
     return user
 
 def get_user_db_by_username(username: str, session: SessionDep):
     clean_username = username.lower().strip()
     user = session.exec(
-        select(UserDb).where(func.lower(UserDb.username) == clean_username)
+        select(UsersDb).where(func.lower(UsersDb.username) == clean_username)
     ).one_or_none()
     return user
 
@@ -107,7 +107,7 @@ def get_current_user(
 def authenticate_user(session: SessionDep, username: str, password: str):
     clean_username = username.lower().strip()
     user = session.exec(
-        select(UserDb).where(func.lower(UserDb.username) == clean_username)
+        select(UsersDb).where(func.lower(UsersDb.username) == clean_username)
     ).one_or_none()
     if not user:
         return False
@@ -139,7 +139,7 @@ def create_user(user: Annotated[User, Body()], session: SessionDep) -> Response:
         raise HTTPException(status_code=422, detail="A senha não pode ser menor do que 6 caracters")
 
     hashed_password = get_password_hash(user.password)
-    db_user = UserDb(
+    db_user = UsersDb(
         username=user.username,
         full_name=user.full_name,
         hashed_password=hashed_password
@@ -192,27 +192,27 @@ def logout():
 
 @router.get("/auth/me", tags=["auth"], response_model=UserPublic)
 def read_users_me(
-    current_user: Annotated[UserDb, Depends(get_current_user)]
+    current_user: Annotated[UsersDb, Depends(get_current_user)]
 ):
     return current_user
 
 @router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
 def read_users(
     session: SessionDep,
-    current_user: Annotated[UserDb, Depends(get_current_user)]
+    current_user: Annotated[UsersDb, Depends(get_current_user)]
 ):
     
     if current_user.role != "admin":
         raise credentials_exception
 
-    users = session.exec(select(UserDb)).all()
+    users = session.exec(select(UsersDb)).all()
     return users
 
 @router.get("/users/{user_id}", response_model=UserPublic, tags=["users"])
 def read_user(
     user_id: Annotated[int, Path()],
     session: SessionDep,
-    current_user: Annotated[UserDb, Depends(get_current_user)],
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
 ):
     
     if current_user.role != "admin":
@@ -226,7 +226,7 @@ def read_user(
 @router.delete("/users/", tags=['users'])
 def delete_user_me(
     session: SessionDep,
-    current_user: Annotated[UserDb, Depends(get_current_user)]
+    current_user: Annotated[UsersDb, Depends(get_current_user)]
 ):
     if not current_user:
         raise credentials_exception
@@ -238,7 +238,7 @@ def delete_user_me(
 @router.delete("/users/{user_id}", tags=['users'])
 def delete_user(
     session: SessionDep,
-    current_user: Annotated[UserDb, Depends(get_current_user)],
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
     user_id: Annotated[int, Path()]
 ):
     
@@ -256,7 +256,7 @@ def delete_user(
 
 @router.post("/users/{user_id}/images", tags=["users"])
 async def upload_user_image(
-    current_user: Annotated[UserDb, Depends(get_current_user)],
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
     file: Annotated[UploadFile, File()],
     session: SessionDep,
     user_id: Annotated[int, Path()],
@@ -265,7 +265,7 @@ async def upload_user_image(
     if user_id != current_user.id and current_user.role != "admin":
         raise credentials_exception
 
-    user = session.get(UserDb, user_id)
+    user = session.get(UsersDb, user_id)
     
     if user.image_url:
         try:
@@ -292,7 +292,7 @@ async def upload_user_image(
 
 # Editar usuário
 @router.patch("/users/{user_id}", tags=["users"])
-def update_user(current_user: Annotated[UserDb, Depends(get_current_user)], session: SessionDep, user_id: Annotated[int, Path()], user_update: Annotated[UserUpdate, Body()]):
+def update_user(current_user: Annotated[UsersDb, Depends(get_current_user)], session: SessionDep, user_id: Annotated[int, Path()], user_update: Annotated[UserUpdate, Body()]):
     if user_id != current_user.id and current_user.role != "admin":
         raise credentials_exception
 

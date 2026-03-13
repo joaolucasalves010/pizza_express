@@ -6,7 +6,6 @@ from routers import products
 from database import create_db_and_tables
 
 from fastapi.staticfiles import StaticFiles
-from routers.products import IMAGEDIR
 
 from pathlib import Path
 

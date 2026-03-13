@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field, table
 from pydantic import FileUrl
 
-class Product(SQLModel, table=True):
+class Products(SQLModel, table=True):
     id: int = Field(default=None,primary_key=True)
     name: str = Field(index=True)
     price: int = Field(index=True)

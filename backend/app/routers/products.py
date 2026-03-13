@@ -8,7 +8,7 @@ from models.user import *
 from routers.users import get_current_user, credentials_exception
 from database import SessionDep
 
-from models.product import Product, ProductPublic
+from models.product import Products, ProductPublic
 
 from pathlib import Path
 import os
@@ -19,17 +19,18 @@ router = APIRouter()
 
 ROOT_PATH = Path(__file__).parent.parent
 IMAGEDIR = os.path.join(ROOT_PATH, "uploads", "products", "images")
+os.makedirs(IMAGEDIR, exist_ok=True)
 
 @router.get("/products/", tags=["products"])
 async def read_products(
     session: SessionDep
 ):
-    products = session.exec(select(Product)).all()
+    products = session.exec(select(Products)).all()
     return products
 
 @router.post("/products/", tags=["products"])
 async def create_product(
-    current_user: Annotated[UserDb, Depends(get_current_user)],
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
     session: SessionDep,
     product: ProductPublic,
 ):
@@ -38,7 +39,7 @@ async def create_product(
         raise credentials_exception
 
     product_dict = product.model_dump()
-    db_product = Product(**product_dict)
+    db_product = Products(**product_dict)
     session.add(db_product)
     session.commit()
     session.refresh(db_product)
@@ -47,7 +48,7 @@ async def create_product(
 
 @router.post("/products/{product_id}/images", tags=["products"])
 async def upload_product_image(
-    current_user: Annotated[UserDb, Depends(get_current_user)],
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
     product_id: int,
     session: SessionDep,
     file: Annotated[UploadFile, File()]
@@ -56,7 +57,7 @@ async def upload_product_image(
     if current_user.role != "admin":
         raise credentials_exception
 
-    product = session.get(Product, product_id)
+    product = session.get(Products, product_id)
     if product is None:
         raise HTTPException(detail="Produto não encontrado!", status_code=404)
     
@@ -70,7 +71,21 @@ async def upload_product_image(
 
     return JSONResponse(content={"message": "Imagem adicionada com sucesso!"}, status_code=200)
 
-# Criar produto NOME, ID, IMAGEM, PREÇO e DESCRIÇÃO
-# Editar Produto
-# Deletar Produto
-# Retornar todos os produtos
+@router.delete("/products/{product_id}", tags=["products"])
+async def delete_product(
+    session: SessionDep,
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
+    product_id: Annotated[int, Path()],
+):
+    if current_user.role != "admin":
+        raise credentials_exception
+    
+    product = session.exec(select(Products).where(Products.id == product_id)).one_or_none()
+
+    if not product:
+        raise HTTPException(detail="produto não encontrado!", status_code=404)
+
+    session.delete(product)
+    session.commit()
+
+    return JSONResponse(content={"message": "Produto deletado com sucesso!"}, status_code=200)

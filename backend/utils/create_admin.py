@@ -15,7 +15,7 @@ class UserBase(SQLModel):
 class User(UserBase):
     password: str
      
-class UserDb(UserBase, table=True):
+class UsersDb(UserBase, table=True):
     id: int | None = Field(primary_key=True, default=None)
     hashed_password: str
     role: str = Field(index=True, default="client")
@@ -38,7 +38,7 @@ def get_password_hash(password):
 def verify_existing_username(username: str, session: Session): # Verificando nome de usuário
     clean_username = username.lower().strip()
     user = session.exec(
-        select(UserDb).where(func.lower(UserDb.username) == clean_username)
+        select(UsersDb).where(func.lower(UsersDb.username) == clean_username)
     ).one_or_none()
     
     if user is not None:
@@ -49,7 +49,7 @@ def create_admin_user(user: User):
       verify_existing_username(user.username, session=session)
       hashed_password = get_password_hash(user.password)
 
-      db_user = UserDb(hashed_password=hashed_password, username = user.username, full_name = user.full_name, role = "admin")
+      db_user = UsersDb(hashed_password=hashed_password, username = user.username, full_name = user.full_name, role = "admin")
 
       session.add(db_user)
       session.commit()

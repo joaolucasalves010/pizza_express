@@ -5,4 +5,4 @@ class Orders(SQLModel, table=True):
     description: str = Field(index=True)
     observations: str | None = Field(default=None)
 
-    client_id: int | None = Field(default=None, foreign_key="userdb.id")
+    client_id: int | None = Field(default=None, foreign_key="usersdb.id")
