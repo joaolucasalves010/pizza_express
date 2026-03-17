@@ -5,13 +5,14 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import LoadingPage from "./LoadingPage";
 
-import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom" 
+import {  useEffect, useState } from "react";
 
 import  { ShoppingCart } from "lucide-react"
-import { UserContext } from "@/contexts/UserContext";
 
 import useGetUser from "@/hooks/useGetUser";
+
+import { CartContext } from "@/contexts/CartContext";
+import { useContext } from "react";
 
 const Home = () => {
 
@@ -49,23 +50,25 @@ const Home = () => {
     return <LoadingPage />;
   }
 
+   const { setOrder } = useContext(CartContext)!
+   
   return (
     <div className="min-h-screen flex flex-col bg-gray-200">
       <Header />
 
       <main className="flex-1">
         <div className="p-8 flex flex-col text-center">
-          <h1 className="text-4xl font-bold">
+          <h1 className="text-xl lg:text-4xl md:text-4xl font-bold">
             A melhor pizza da cidade entregue na sua porta.
           </h1>
 
-          <p className="text-lg text-gray-600 mt-2">
+          <p className="lg:text-lg md:text-lg text-gray-600 mt-2">
             Massa artesanal, ingredientes frescos e entrega rápida.
           </p>
         </div>
 
         <div className="flex flex-col items-center justify-center">
-          <h1 className="text-center text-3xl font-bold text-gray-800 leading-relaxed">
+          <h1 className="text-center text-xl lg:text-3xl md:text-3xl font-bold text-gray-800 leading-relaxed">
             Cardápio
           </h1>
 
@@ -100,7 +103,7 @@ const Home = () => {
                       R$ {Number(product.price).toFixed(2)}
                     </span>
 
-                    <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2 hover:scale-102 duration-300 cursor-pointer">
+                    <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2 hover:scale-102 duration-300 cursor-pointer" onClick={() => setOrder((prevState) => [...prevState, product])}>
                       <ShoppingCart />
                       Adicionar
                     </button>
@@ -111,7 +114,7 @@ const Home = () => {
           ))}
           {products.length == 0 && (
             <div>
-              <p className="text-lg">Nenhum produto encontrado!</p>
+              <p className="lg:text-lg md:text-lg">Nenhum produto encontrado!</p>
             </div>
           )}
         </div>
