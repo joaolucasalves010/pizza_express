@@ -163,6 +163,12 @@ def login(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    if user.active == False:
+        user.active = True
+
+        session.commit()
+        session.refresh(user)
+
     access_token = create_access_token(
         data={"username": user.username, "full_name": user.full_name, "user_id": user.id, "user_role": user.role},
     )
@@ -317,3 +323,24 @@ def update_user(current_user: Annotated[UsersDb, Depends(get_current_user)], ses
     session.refresh(user)
 
     return JSONResponse(content={"message": "Alterações feitas com sucesso!"}, status_code=200)
+
+@router.patch("/users/deactivate/{user_id}", tags=["users"])
+def deactivate_user(
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
+    user_id: Annotated[int, Path()],
+    session: SessionDep
+):
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise credentials_exception
+    
+    user = get_user_db(user_id=user_id, session=session)
+
+    if not user:
+        raise HTTPException(detail="Usuário não encontrado!", status_code=404)
+    
+    user.active = False
+    
+    session.commit()
+    session.refresh(user)
+
+    return JSONResponse(content={"message": "Usuário desativado com sucesso"}, status_code=200)
