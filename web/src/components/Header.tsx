@@ -55,11 +55,13 @@ const Header = () => {
           </ul>
           <div className="flex gap-4 items-center">
             <div className="flex items-center gap-2 sm:bg-amber-400 p-2 rounded-xl sm:text-black cursor-pointer hover:opacity-95 hover:scale-102 duration-200">
-              <ShoppingCart
+              <button className="flex items-center gap-2">
+                <ShoppingCart
                 size={25}
                 className="hover:scale-105 ease-linear duration-110"
               />
               <p className="text-bold hidden sm:block">Carrinho</p>
+              </button>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger>
