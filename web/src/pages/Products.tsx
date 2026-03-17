@@ -15,17 +15,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { toast } from "sonner"
 
-import { toast, Toaster } from "sonner"
 
 function DeleteButton({ productId }: { productId: number }) {
   const [open, setOpen] = useState(false)
 
   async function handleConfirm() {
-    const res = await api.delete(`/products/${productId}`, {withCredentials: true})
+    const res = await api.delete(`/products/${productId}/`, {withCredentials: true})
     if (res.status === 200) {
       toast.success("Produto deletado com sucesso!")
-      location.reload()
     }
     setOpen(false)
   }
@@ -118,7 +117,6 @@ export default function Products() {
       {loading && <p className="text-muted-foreground">Carregando produtos...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {!loading && !error && <DataTable columns={columns} data={products} />}
-      <Toaster />
     </div>
   )
 }

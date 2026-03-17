@@ -4,14 +4,20 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "../components/ui/
 import { Outlet } from "react-router-dom";
 import useGetUser from "@/hooks/useGetUser";
 
+import LoadingPage from "./LoadingPage";
+
 const Dashboard = () => {
-  const { getUser } = useGetUser()
+  const { getUser, isLoading } = useGetUser()
 
   useEffect(() => {
     document.title = "Dashboard - PizzaExpress";
 
     getUser()
   }, []);
+
+  if (isLoading) {
+    return <LoadingPage />
+  }
 
   return (
     <SidebarProvider>

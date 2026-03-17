@@ -8,7 +8,18 @@ import { useNavigate } from "react-router-dom"
 import { UserContext } from "@/contexts/UserContext"
 
 import api from "@/services/api"
-import { Camera, ArrowLeft } from "lucide-react"
+import { Camera, ArrowLeft, PowerOff, Trash2, Trash } from "lucide-react"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog"
 
 import defaultUserImage from "@/assets/user_default.png"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -213,6 +224,59 @@ const onSubmit = async (data: EditUserForm) => {
                 Salvar Alterações
               </button>
             )}
+
+            {/* Divisor */}
+            <div className="flex items-center gap-3 justify-center">
+              <span className="text-xs text-gray-400 font-medium">Gerenciar conta</span>
+            </div>
+
+            {/* Deletar conta */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  type="button"
+                  className="w-full cursor-pointer flex items-center justify-center gap-2 border-2 text-white bg-red-600 hover:opacity-95 font-semibold text-sm rounded-xl py-3 transition-all hover:scale-102 ease-linear"
+                >
+                  <Trash2 size={16} />
+                  Deletar Conta
+                </button>
+              </DialogTrigger>
+              <DialogContent className="p-8">
+                <DialogHeader className="flex items-center justify-center">
+                  <div className="bg-red-600 text-white rounded-full p-4">
+                    <Trash size={50}/>
+                  </div>
+                  <h1 className="text-center text-zinc-800 mt-4">Você tem certeza que deseja deletar sua conta? <br />Essa ação não pode ser desfeita.</h1>
+                </DialogHeader>
+                <button className="w-full bg-red-600 p-2 rounded-lg text-white font-bold flex items-center gap-2 justify-center mt-2">
+                  Confirmar
+                </button>
+              </DialogContent>
+            </Dialog>
+
+            {/* Desativar conta */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <button
+                  type="button"
+                  className="w-full cursor-pointer flex items-center justify-center gap-2 border-2 border-amber-400 text-amber-600 hover:bg-amber-50 font-semibold text-sm rounded-xl py-3 transition-all hover:scale-102 ease-linear"
+                >
+                  <PowerOff size={16} />
+                  Desativar Conta
+                </button>
+              </DialogTrigger>
+              <DialogContent className="p-8">
+                <DialogHeader className="flex items-center justify-center">
+                  <div className="bg-orange-600 text-white rounded-full p-4">
+                    <PowerOff size={50}/>
+                  </div>
+                  <h1 className="text-center text-zinc-800 mt-4">Você tem certeza que deseja desativar sua conta? <br /> Sua conta será reativada ao fazer login novamente.</h1>
+                </DialogHeader>
+                <button className="w-full bg-orange-600 p-2 rounded-lg text-white font-bold flex items-center gap-2 justify-center mt-2">
+                  Confirmar
+                </button>
+              </DialogContent>
+            </Dialog>
           </div>
         </form>
       </div>
