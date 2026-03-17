@@ -11,15 +11,16 @@ load_dotenv()
 class UserBase(SQLModel):
     username: str = Field(index=True)
     full_name: str = Field(index=True)
+    active: bool = Field(default=True)
 
 class User(UserBase):
     password: str
-     
+
 class UsersDb(UserBase, table=True):
     id: int | None = Field(primary_key=True, default=None)
     hashed_password: str
     role: str = Field(index=True, default="client")
-
+    image_url: str | None = None
 
 user = User(
   username=os.environ["ADMIN_USERNAME"],
