@@ -9,7 +9,7 @@ import {
   Eye,
 } from "lucide-react";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 import {
   Collapsible,
@@ -24,14 +24,10 @@ import {
   SidebarHeader,
 } from "./ui/sidebar";
 
-import {
-  Avatar,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { UserContext } from "@/contexts/UserContext";
 
 import UserIcon from "../assets/user_default.png";
-
 
 import {
   DropdownMenu,
@@ -46,13 +42,13 @@ import { LogOutIcon } from "lucide-react";
 import api from "@/services/api";
 
 const DashboardSideBar = () => {
-  const { user, setUser } = useContext(UserContext)!
-  const navigate = useNavigate()
+  const { user, setUser } = useContext(UserContext)!;
+  const navigate = useNavigate();
 
   async function logout() {
-    await api.get("/logout", {withCredentials: true})
-    setUser(null)
-    navigate("/auth/signin")
+    await api.get("/logout", { withCredentials: true });
+    setUser(null);
+    navigate("/auth/signin");
   }
 
   const [isProductsOpen, setIsProductsOpen] = useState(false);
@@ -77,7 +73,6 @@ const DashboardSideBar = () => {
   return (
     <Sidebar className="border-r border-zinc-200 shadow-sm z-10 bg-white">
       <div className="flex flex-col h-full w-full bg-white">
-
         {/* Header / Logo */}
         <SidebarHeader className="p-5 pb-4">
           <div className="flex items-center gap-3 px-1">
@@ -172,7 +167,9 @@ const DashboardSideBar = () => {
               <DropdownMenuTrigger>
                 <Avatar className="w-12 h-12 cursor-pointer">
                   {user?.image_url ? (
-                    <AvatarImage src={`http://localhost:8000${user.image_url}`}/>
+                    <AvatarImage
+                      src={`http://localhost:8000${user.image_url}`}
+                    />
                   ) : (
                     <AvatarImage src={UserIcon} />
                   )}
@@ -181,7 +178,10 @@ const DashboardSideBar = () => {
               <DropdownMenuContent className="w-50 mx-2 cursor-pointer hover:opacity-95">
                 <DropdownMenuGroup>
                   <DropdownMenuItem>
-                    <button className="flex w-full gap-2 items-center cursor-pointer" onClick={logout}>
+                    <button
+                      className="flex w-full gap-2 items-center cursor-pointer"
+                      onClick={logout}
+                    >
                       <LogOutIcon />
                       Sair
                     </button>

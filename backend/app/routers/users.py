@@ -239,7 +239,7 @@ def delete_user_me(
     
     session.delete(current_user)
     session.commit()
-    return JSONResponse(content={"message": f"Usuário {current_user.username} deletado com sucesso!"})
+    return JSONResponse(content={"message": f"Usuário {current_user.username} deletado com sucesso!"}, status_code=200)
 
 @router.delete("/users/{user_id}", tags=['users'])
 def delete_user(
@@ -356,8 +356,11 @@ def count_total_active_users(session: SessionDep):
 @router.get("/total_users", tags=["users"])
 def read_total_users(
     session: SessionDep,
-    # current_user: Annotated[UsersDb, Depends(get_current_user)]
-):
+    current_user: Annotated[UsersDb, Depends(get_current_user)]
+): 
+    if current_user.role != "admin":
+        raise credentials_exception
+   
     total_users = count_total_users(session=session)
     return total_users
 
@@ -365,7 +368,31 @@ def read_total_users(
 @router.get("/active_users", tags=["users"])
 def read_active_users(
     session: SessionDep,
-    # current_user: Annotated[UsersDb, Depends(get_current_user)]
+    current_user: Annotated[UsersDb, Depends(get_current_user)]
 ):
+    
+    if current_user.role != "admin":
+        raise credentials_exception
+    
     total_active_users = count_total_active_users(session=session)
     return total_active_users
+
+@router.patch("/activate/user/{user_id}", tags=["users"])
+def activate_user(
+    session: SessionDep,
+    current_user: Annotated[UsersDb, Depends(get_current_user)],
+    user_id: Annotated[int, Path()]
+):
+    if current_user.role != "admin":
+        raise credentials_exception
+    
+    user = get_user_db(user_id=user_id, session=session)
+
+    if not user:
+        raise credentials_exception
+    
+    user.active = True
+    session.commit()
+    session.refresh(user)
+    
+    return JSONResponse(content={"message": "Usuário ativo com sucesso!"}, status_code=200)

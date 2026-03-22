@@ -64,6 +64,31 @@ const UsersTable = ({ itemsPerPage = 8 }: UsersTableProps) => {
     return pages;
   };
 
+    const deactivateUser = async (id: Number) => {
+    const res = await api.patch(
+      `/users/deactivate/${id}`,
+      {},
+      { withCredentials: true },
+    );
+    if (res.status == 200) {
+      window.location.reload();
+    }
+  };
+
+  const deleteUser = async (id: Number) => {
+    const res = await api.delete(`/users/${id}`, { withCredentials: true });
+    if (res.status == 200) {
+      window.location.reload()
+    }
+  };
+
+  const activateUser = async (id: Number) => {
+    const res = await api.patch(`/activate/user/${id}`, {}, {withCredentials: true})
+    if (res.status == 200) {
+      window.location.reload()
+    }
+  }
+
   return (
     <Card className="p-4 w-full">
       <h2 className="text-xl font-semibold mb-4">Usuários</h2>
@@ -97,12 +122,16 @@ const UsersTable = ({ itemsPerPage = 8 }: UsersTableProps) => {
                   {u.active ? (
                     <div className="bg-green-400 p-2 w-3 h-3 rounded-full"/>
                   ) : (
-                    <div className="bg-red-500 p-2 w-3 h-3 rounded-full"/>
+                    <div className="bg-yellow-500 p-2 w-3 h-3 rounded-full"/>
                   )}
                 </TableCell>
                 <TableCell className="text-gray-500 flex items-center gap-4">
-                  <button>Deletar</button>
-                  <button>Desativar</button>
+                  <button onClick={() => deleteUser(u.id)} className="cursor-pointer text-red-500">Deletar</button>
+                  {u.active == true ? (
+                    <button onClick={() => deactivateUser(u.id)} className="cursor-pointer text-orange-500">Desativar</button>
+                  ) : (
+                    <button onClick={() => activateUser(u.id)} className="cursor-pointer text-green-500">Ativar</button>
+                  )}
                 </TableCell>
               </TableRow>
             ))

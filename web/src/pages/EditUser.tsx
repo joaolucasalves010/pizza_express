@@ -13,12 +13,8 @@ import { Camera, ArrowLeft, PowerOff, Trash2, Trash } from "lucide-react"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog"
 
 import defaultUserImage from "@/assets/user_default.png"
@@ -110,7 +106,7 @@ const onSubmit = async (data: EditUserForm) => {
         await api.get("/logout", {withCredentials: true})
         setUser(null)
         navigate("/auth/signin")
-      }, 5000)
+      }, 1500)
 
     }
   } catch (err) {
@@ -121,6 +117,38 @@ const onSubmit = async (data: EditUserForm) => {
 }
 
   const { ref: registerImageRef, ...registerImageRest } = register("image");
+
+  const deactivateUser = async () => {
+    try {
+      const res = await api.patch(`/users/deactivate/${user?.id}`, {}, {withCredentials: true})
+      if (res.status == 200) {
+        toast.success("Conta desativada com sucesso!")
+        setTimeout(async() => {
+            await api.get("/logout", {withCredentials: true})
+          setUser(null)
+            navigate("/auth/signin")
+        }, 500)
+      }
+    } catch {
+      toast.error("Não foi possível desativar sua conta!")
+    }
+  }
+
+  const deleteUser = async () => {
+    try {
+      const res = await api.delete("/users/", {withCredentials: true})
+      if (res.status === 200) {
+        toast.success("Conta deletada com sucesso!")
+        setTimeout(async() => {
+          await api.get("/logout", {withCredentials: true})
+          setUser(null)
+            navigate("/auth/signin")
+        }, 500)
+      }
+    } catch {
+      toast.error("Não foi possível deletar sua conta!")
+    }
+  }
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-orange-100 p-4 font-sans">
@@ -244,13 +272,12 @@ const onSubmit = async (data: EditUserForm) => {
                   </div>
                   <h1 className="text-center text-zinc-800 mt-4">Você tem certeza que deseja deletar sua conta? <br />Essa ação não pode ser desfeita.</h1>
                 </DialogHeader>
-                <button className="w-full bg-red-600 p-2 rounded-lg text-white font-bold flex items-center gap-2 justify-center mt-2">
+                <button className="w-full bg-red-600 p-2 rounded-lg text-white font-bold flex items-center gap-2 justify-center mt-2 cursor-pointer" onClick={() => deleteUser()}>
                   Confirmar
                 </button>
               </DialogContent>
             </Dialog>
 
-            {/* Desativar conta */}
             <Dialog>
               <DialogTrigger asChild>
                 <button
@@ -268,7 +295,7 @@ const onSubmit = async (data: EditUserForm) => {
                   </div>
                   <h1 className="text-center text-zinc-800 mt-4">Você tem certeza que deseja desativar sua conta? <br /> Sua conta será reativada ao fazer login novamente.</h1>
                 </DialogHeader>
-                <button className="w-full bg-orange-600 p-2 rounded-lg text-white font-bold flex items-center gap-2 justify-center mt-2">
+                <button className="w-full bg-orange-600 p-2 rounded-lg text-white font-bold flex items-center gap-2 justify-center mt-2 cursor-pointer" onClick={() => deactivateUser()}>
                   Confirmar
                 </button>
               </DialogContent>
