@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import UsersTable from "@/components/UsersTable";
 import { UserContext } from "@/contexts/UserContext";
 import { BadgeDollarSign, DollarSign, User, UserCheck } from "lucide-react";
 import { useContext } from "react";
@@ -47,6 +48,7 @@ const DashboardHome = () => {
           </div>
         </Card>
       </div>
+      <UsersTable />
     </div>
   );
 };

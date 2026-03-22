@@ -224,19 +224,15 @@ const onSubmit = async (data: EditUserForm) => {
                 Salvar Alterações
               </button>
             )}
-
-            {/* Divisor */}
             <div className="flex items-center gap-3 justify-center">
               <span className="text-xs text-gray-400 font-medium">Gerenciar conta</span>
             </div>
-
-            {/* Deletar conta */}
             <Dialog>
               <DialogTrigger asChild>
                 <button
                   type="button"
                   className="w-full cursor-pointer flex items-center justify-center gap-2 border-2 text-white bg-red-600 hover:opacity-95 font-semibold text-sm rounded-xl py-3 transition-all hover:scale-102 ease-linear"
-                >
+               >
                   <Trash2 size={16} />
                   Deletar Conta
                 </button>

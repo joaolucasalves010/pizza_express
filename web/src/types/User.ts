@@ -3,5 +3,7 @@ export type User = {
   full_name: string,
   id: number,
   role: string,
-  image_url: string | null
+  image_url: string | null,
+  active: boolean,
+  created_at: string
 }

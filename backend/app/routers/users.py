@@ -9,7 +9,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 
-from sqlmodel import select
+from sqlmodel import select, col
 from sqlalchemy import func
 
 from datetime import timedelta, datetime, timezone
@@ -344,3 +344,28 @@ def deactivate_user(
     session.refresh(user)
 
     return JSONResponse(content={"message": "Usuário desativado com sucesso"}, status_code=200)
+
+def count_total_users(session: SessionDep):
+    total_users = session.exec(select(func.count(col(UsersDb.active)))).one()
+    return total_users
+
+def count_total_active_users(session: SessionDep):
+    total_active_users = session.exec(select(func.count()).select_from(UsersDb).where(UsersDb.active == True)).one()
+    return total_active_users
+
+@router.get("/total_users", tags=["users"])
+def read_total_users(
+    session: SessionDep,
+    # current_user: Annotated[UsersDb, Depends(get_current_user)]
+):
+    total_users = count_total_users(session=session)
+    return total_users
+
+
+@router.get("/active_users", tags=["users"])
+def read_active_users(
+    session: SessionDep,
+    # current_user: Annotated[UsersDb, Depends(get_current_user)]
+):
+    total_active_users = count_total_active_users(session=session)
+    return total_active_users

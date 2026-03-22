@@ -25,6 +25,7 @@ function DeleteButton({ productId }: { productId: number }) {
     const res = await api.delete(`/products/${productId}/`, {withCredentials: true})
     if (res.status === 200) {
       toast.success("Produto deletado com sucesso!")
+      window.location.reload()
     }
     setOpen(false)
   }
@@ -32,7 +33,7 @@ function DeleteButton({ productId }: { productId: number }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive" size="sm">
+        <Button variant="destructive" size="sm" className="cursor-pointer hover:scale-102 duration-300">
           <Trash className="w-4 h-4 mr-1" />
           Deletar
         </Button>
@@ -47,10 +48,10 @@ function DeleteButton({ productId }: { productId: number }) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => setOpen(false)} className="cursor-pointer">
             Cancelar
           </Button>
-          <Button variant="destructive" onClick={handleConfirm}>
+          <Button variant="destructive" onClick={handleConfirm} className="cursor-pointer">
             Confirmar
           </Button>
         </DialogFooter>

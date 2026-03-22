@@ -5,6 +5,7 @@ from sqlmodel import SQLModel, Session, create_engine, Field, select
 from sqlalchemy import func
 
 from pwdlib import PasswordHash
+from datetime import datetime, timedelta, timezone
 
 load_dotenv()
 
@@ -12,6 +13,7 @@ class UserBase(SQLModel):
     username: str = Field(index=True)
     full_name: str = Field(index=True)
     active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class User(UserBase):
     password: str

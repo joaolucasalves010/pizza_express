@@ -1,9 +1,11 @@
 from sqlmodel import SQLModel, Field
+from datetime import datetime, timedelta, timezone
 
 class UserBase(SQLModel):
     username: str = Field(index=True)
     full_name: str = Field(index=True)
     active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class User(UserBase):
     password: str
