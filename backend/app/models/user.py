@@ -1,6 +1,8 @@
 from sqlmodel import SQLModel, Field
 from datetime import datetime, timedelta, timezone
 
+from pydantic import BaseModel
+
 class UserBase(SQLModel):
     username: str = Field(index=True)
     full_name: str = Field(index=True)
@@ -29,3 +31,8 @@ class UserUpdate(SQLModel):
     username: str | None = Field(default=None)
     full_name: str | None = Field(default=None)
     password: str | None = Field(default=None)
+
+class UsersResponse(BaseModel):
+    users: list[UserPublic]
+    total_users: int
+    total_active_users: int

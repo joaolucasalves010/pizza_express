@@ -1,12 +1,25 @@
 import { Card } from "@/components/ui/card";
 import UsersTable from "@/components/UsersTable";
 import { UserContext } from "@/contexts/UserContext";
+import api from "@/services/api";
 import { BadgeDollarSign, DollarSign, User, UserCheck } from "lucide-react";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 const DashboardHome = () => {
-
   const { user } = useContext(UserContext)!
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [activeUsers, setActiveUsers] = useState(0)
+
+  useEffect(() => {
+    const getUsersData = async () => {
+      const res = await api.get("/users", {withCredentials: true})
+      if (res.status == 200) {
+        setTotalUsers(res.data.total_users)
+        setActiveUsers(res.data.total_active_users)
+      }
+    }
+    getUsersData()
+  }, [])
 
   return (
     <div className="flex items-center justify-center flex-col">
@@ -35,7 +48,7 @@ const DashboardHome = () => {
               <User  size={30}/>
               <p className="text-lg uppercase font-semibold">Usuários totais</p>
             </div>
-            <p className="text-center text-xl font-semibold">1200</p>
+            <p className="text-center text-xl font-semibold">{totalUsers}</p>
           </div>
         </Card>
         <Card className="py-4 shadow-lg shadow-blue-400 bg-blue-600 text-white border-none">
@@ -44,7 +57,7 @@ const DashboardHome = () => {
               <UserCheck  size={30}/>
               <p className="text-lg uppercase font-semibold">Usuários ativos</p>
             </div>
-            <p className="text-center text-xl font-semibold">120</p>
+            <p className="text-center text-xl font-semibold">{activeUsers}</p>
           </div>
         </Card>
       </div>

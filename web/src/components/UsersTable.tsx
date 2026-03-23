@@ -26,7 +26,7 @@ const UsersTable = ({ itemsPerPage = 8 }: UsersTableProps) => {
     const getUsers = async () => {
       const res = await api.get("/users/", {withCredentials: true})
       if (res.status == 200) {
-        setUsers(res.data)
+        setUsers(res.data.users)
         console.log(res.data)
       }
     }

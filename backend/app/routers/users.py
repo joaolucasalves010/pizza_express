@@ -202,7 +202,7 @@ def read_users_me(
 ):
     return current_user
 
-@router.get("/users/", status_code=200, tags=["users"], response_model=list[UserPublic])
+@router.get("/users/", status_code=200, tags=["users"], response_model=UsersResponse)
 def read_users(
     session: SessionDep,
     current_user: Annotated[UsersDb, Depends(get_current_user)]
@@ -211,8 +211,11 @@ def read_users(
     if current_user.role != "admin":
         raise credentials_exception
 
+    total_users = session.exec(select(func.count(col(UsersDb.id)))).one()
+    total_active_users = session.exec(select(func.count()).select_from(UsersDb).where(UsersDb.active == True)).one()
     users = session.exec(select(UsersDb)).all()
-    return users
+
+    return UsersResponse(users=users, total_active_users=total_active_users, total_users=total_users)
 
 @router.get("/users/{user_id}", response_model=UserPublic, tags=["users"])
 def read_user(
@@ -344,38 +347,6 @@ def deactivate_user(
     session.refresh(user)
 
     return JSONResponse(content={"message": "Usuário desativado com sucesso"}, status_code=200)
-
-def count_total_users(session: SessionDep):
-    total_users = session.exec(select(func.count(col(UsersDb.active)))).one()
-    return total_users
-
-def count_total_active_users(session: SessionDep):
-    total_active_users = session.exec(select(func.count()).select_from(UsersDb).where(UsersDb.active == True)).one()
-    return total_active_users
-
-@router.get("/total_users", tags=["users"])
-def read_total_users(
-    session: SessionDep,
-    current_user: Annotated[UsersDb, Depends(get_current_user)]
-): 
-    if current_user.role != "admin":
-        raise credentials_exception
-   
-    total_users = count_total_users(session=session)
-    return total_users
-
-
-@router.get("/active_users", tags=["users"])
-def read_active_users(
-    session: SessionDep,
-    current_user: Annotated[UsersDb, Depends(get_current_user)]
-):
-    
-    if current_user.role != "admin":
-        raise credentials_exception
-    
-    total_active_users = count_total_active_users(session=session)
-    return total_active_users
 
 @router.patch("/activate/user/{user_id}", tags=["users"])
 def activate_user(

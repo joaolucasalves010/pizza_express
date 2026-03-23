@@ -11,7 +11,7 @@ import { useContext } from "react";
 import { CartContext } from "@/contexts/CartContext";
 
 const CartComponent = () => {
-  const { order, totalItems, setOrder } = useContext(CartContext)!;
+  const { order, totalItems, setOrder, totalValue } = useContext(CartContext)!;
 
   return (
     <div className="flex items-center gap-2 sm:bg-amber-400 p-2 rounded-xl sm:text-black cursor-pointer hover:opacity-95 hover:scale-102 duration-200">
@@ -69,6 +69,10 @@ const CartComponent = () => {
                 </div>
               ))}
               <hr />
+              <div className="flex items-center justify-between">
+                <p className="text-lg font-semibold">Total</p>
+                <span className="font-semibold text-lg p-2">R$ {totalValue.toFixed(2)}</span>
+              </div>
               <button className="w-full flex items-center justify-center bg-orange-400 p-4 rounded-xl text-white font-semibold hover:scale-102 hover:bg-orange-300 duration-300 cursor-pointer">Finalizar pedido</button>
             </div>
           ) : (
